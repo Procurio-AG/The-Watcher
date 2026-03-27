@@ -71,6 +71,8 @@ export function chaosHeaders(attackType, chaosTrigger) {
 
 // ─── Response Checker ───────────────────────────────────────────────────
 // Standardized check wrapper that feeds custom metrics.
+// Only 5xx counts as a system error — 400s are domain-level (e.g. seats exhausted)
+// and not indicative of infrastructure failure.
 export function checkResponse(res, name, expectedStatus) {
   expectedStatus = expectedStatus || 200;
 
@@ -82,7 +84,7 @@ export function checkResponse(res, name, expectedStatus) {
   // Feed custom metrics regardless of pass/fail
   reqDuration.add(res.timings.duration, { endpoint: name });
   totalReqs.add(1, { endpoint: name });
-  errorRate.add(res.status >= 400);
+  errorRate.add(res.status >= 500);   // Only 5xx = system error
 
   if (res.status >= 500) {
     totalErrors.add(1, { endpoint: name });

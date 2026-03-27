@@ -32,10 +32,11 @@ export const PHASE = {
 // ─── Handle Summary ─────────────────────────────────────────────────────
 // Writes a JSON summary to load-tests/results/ for post-analysis.
 // k6 calls this automatically at the end of a test run.
+// NOTE: Run k6 from the load-tests/ directory for correct path resolution.
 export function buildSummaryHandler(testName) {
   return function handleSummary(data) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename  = `../results/${testName}_${timestamp}.json`;
+    const filename  = `./results/${testName}_${timestamp}.json`;
     const output    = {};
     output[filename] = JSON.stringify(data, null, 2);
 
