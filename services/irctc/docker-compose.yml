@@ -1,0 +1,114 @@
+version: "3.8"
+
+x-service-common: &service-common
+  environment:
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318/v1/traces
+    - CHAOS_LATENCY_MAX_MS=0
+    - CHAOS_ERROR_RATE=0.0
+  networks:
+    - train-ticket-net
+
+services:
+  user-service:
+    <<: *service-common
+    build:
+      context: ./services
+      args:
+        SERVICE_NAME: user-service
+    ports: ["8001:8000"]
+
+  auth-service:
+    <<: *service-common
+    build:
+      context: ./services
+      args:
+        SERVICE_NAME: auth-service
+    ports: ["8002:8000"]
+
+  station-service:
+    <<: *service-common
+    build:
+      context: ./services
+      args:
+        SERVICE_NAME: station-service
+    ports: ["8003:8000"]
+
+  train-service:
+    <<: *service-common
+    build:
+      context: ./services
+      args:
+        SERVICE_NAME: train-service
+    ports: ["8004:8000"]
+
+  schedule-service:
+    <<: *service-common
+    build:
+      context: ./services
+      args:
+        SERVICE_NAME: schedule-service
+    ports: ["8005:8000"]
+
+  ticket-service:
+    <<: *service-common
+    build:
+      context: ./services
+      args:
+        SERVICE_NAME: ticket-service
+    ports: ["8006:8000"]
+
+  order-service:
+    <<: *service-common
+    build:
+      context: ./services
+      args:
+        SERVICE_NAME: order-service
+    ports: ["8007:8000"]
+
+  payment-service:
+    <<: *service-common
+    build:
+      context: ./services
+      args:
+        SERVICE_NAME: payment-service
+    ports: ["8008:8000"]
+
+  notification-service:
+    <<: *service-common
+    build:
+      context: ./services
+      args:
+        SERVICE_NAME: notification-service
+    ports: ["8009:8000"]
+
+  gateway-service:
+    <<: *service-common
+    build:
+      context: ./services
+      args:
+        SERVICE_NAME: gateway-service
+    ports: ["8000:8000"]
+    depends_on:
+      - user-service
+      - auth-service
+      - station-service
+      - train-service
+      - schedule-service
+      - ticket-service
+      - order-service
+      - payment-service
+      - notification-service
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "4318:4318" # OTLP HTTP receiver
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - train-ticket-net
+
+networks:
+  train-ticket-net:
+    driver: bridge

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: wasmedge-observability-agent
+  namespace: train-ticket
+  labels:
+    app: wasmedge-agent
+spec:
+  selector:
+    matchLabels:
+      app: wasmedge-agent
+  template:
+    metadata:
+      labels:
+        app: wasmedge-agent
+    spec:
+      containers:
+      - name: wasmedge-node-monitor
+        image: wasmedge/wasmedge:latest
+        command: ["wasmedge", "--dir", ".:/", "monitor.wasm"]
+        volumeMounts:
+        - name: sla-config
+          mountPath: /etc/config/sla_config.json
+          subPath: sla_config.json
+        # Mount host node metrics or log directories to allow Wasm edge functions to natively detect starvation
+        - name: host-metrics
+          mountPath: /var/log/host
+          readOnly: true
+        env:
+        # Publish SLA violation events immediately back to Phase 3 LangGraph Event bus
+        - name: EVENT_BUS_URL
+          value: "nats://nats-service:4222"
+      volumes:
+      - name: sla-config
+        configMap:
+          name: wasm-sla-thresholds
+      - name: host-metrics
+        hostPath:
+          path: /var/log

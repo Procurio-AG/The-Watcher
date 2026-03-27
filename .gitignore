@@ -1,0 +1,156 @@
+# =========================
+# OS & General
+# =========================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+
+# =========================
+# Environment & Secrets
+# =========================
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+secrets.yaml
+*.secret
+
+# =========================
+# Python (FastAPI, ML, scripts)
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Testing & coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+
+# Jupyter / ML artifacts
+.ipynb_checkpoints/
+*.h5
+*.pt
+*.pth
+*.onnx
+*.joblib
+*.pkl
+
+# =========================
+# Node.js / Frontend (React / Next.js)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+.next/
+out/
+build/
+dist/
+
+# Vite / cache
+.vite/
+.cache/
+
+# =========================
+# Kubernetes / Infra
+# =========================
+*.kubeconfig
+kubeconfig*
+.kube/
+
+# Helm (if used later)
+charts/*.tgz
+charts/*/charts/
+
+# Terraform (if added later)
+.terraform/
+terraform.tfstate*
+*.tfvars
+
+# =========================
+# Logs & Observability
+# =========================
+logs/
+*.log
+
+# Loki / Promtail temp
+loki-data/
+promtail-positions.yaml
+
+# Prometheus
+prometheus-data/
+
+# Jaeger
+jaeger-data/
+
+# OpenSearch
+opensearch-data/
+
+# Pixie / eBPF temp
+px-data/
+
+# =========================
+# k6 Load Testing
+# =========================
+*.json
+*.csv
+k6-results/
+load-tests/results/
+
+# =========================
+# WebAssembly / Rust / C++
+# =========================
+# Rust (WasmEdge)
+target/
+Cargo.lock
+
+# C/C++
+*.o
+*.out
+*.exe
+
+# WASM builds
+*.wasm
+
+# =========================
+# IDEs & Editors
+# =========================
+.vscode/
+.idea/
+*.iml
+
+# =========================
+# Docker
+# =========================
+*.tar
+*.img
+
+# =========================
+# Misc
+# =========================
+coverage/
+tmp/
+temp/

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wasm-sla-thresholds
+  namespace: train-ticket
+data:
+  sla_config.json: |
+    {
+      "global_p95_latency_ms": 2000,
+      "cpu_starvation_threshold_percent": 85,
+      "memory_starvation_threshold_mb": 500,
+      "deep_path_trigger": "immediate"
+    }
