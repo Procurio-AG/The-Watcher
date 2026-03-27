@@ -117,6 +117,11 @@ px-data/
 # k6 Load Testing
 # =========================
 *.json
+!visualizer/ui/package.json
+!visualizer/ui/package-lock.json
+!visualizer/ui/tsconfig.json
+!services/irctc/openapi_summary.json
+!services/irctc/services/common/user_config.json
 *.csv
 k6-results/
 load-tests/results/
