@@ -1,8 +1,9 @@
 import * as ort from 'onnxruntime-web';
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const dir = import.meta.dirname;
+const dir = dirname(fileURLToPath(import.meta.url));
 const vocab     = JSON.parse(readFileSync(join(dir, 'vocab.json'), 'utf-8'));
 const constants = JSON.parse(readFileSync(join(dir, 'constants.json'), 'utf-8'));
 
