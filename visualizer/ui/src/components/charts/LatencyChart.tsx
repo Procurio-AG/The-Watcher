@@ -37,7 +37,7 @@ export default function LatencyChart() {
   const latest = chartData[chartData.length - 1];
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-surface-200 shadow-card card-hover">
+    <div className="bg-white rounded-3xl p-5 border border-surface-200 shadow-card card-hover h-full flex flex-col">
       {/* Header row */}
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-[15px] font-semibold text-gray-900">Service Latency</h3>
@@ -47,7 +47,7 @@ export default function LatencyChart() {
       </div>
 
       {/* Funnel stat tabs */}
-      <div className="flex gap-0 mb-5 border-b border-surface-200">
+      <div className="flex gap-0 mb-3 border-b border-surface-200">
         {FUNNEL_LABELS.map((item, idx) => {
           const val = latest ? latest[item.key as keyof typeof latest] : 0;
           const isSelected = idx === 1; // highlight p95
@@ -70,7 +70,7 @@ export default function LatencyChart() {
       </div>
 
       {/* Chart */}
-      <div className="h-[240px]">
+      <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -10 }}>
             <defs>

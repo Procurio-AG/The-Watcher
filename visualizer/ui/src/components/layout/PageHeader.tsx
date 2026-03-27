@@ -18,7 +18,7 @@ export default function PageHeader({ title, systemState = "healthy", showDateRan
   const Icon = config.icon;
 
   return (
-    <div className="flex items-end justify-between mb-8">
+    <div className="flex items-end justify-between mb-3">
       <div className="flex items-center gap-3">
         {systemState !== "healthy" && <Icon className={`w-8 h-8 ${config.color}`} />}
         <h1 className="text-display text-gray-900">{title}</h1>

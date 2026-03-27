@@ -9,12 +9,15 @@ clients:
 
 scrape_configs:
   - job_name: containers
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: containers
-          __path__: /var/lib/docker/containers/*/*-json.log
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'service_name'
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'
     pipeline_stages:
       - docker: {}
       - json:
@@ -27,13 +30,9 @@ scrape_configs:
       - labels:
           level:
           module:
-      - template:
-          source: service_name
-          template: "{{ .container_name }}"
-      - labels:
-          service_name:
       - timestamp:
           source: timestamp
           format: "2006-01-02T15:04:05.999999999Z"
           fallback_formats:
             - "2006-01-02T15:04:05Z"
+

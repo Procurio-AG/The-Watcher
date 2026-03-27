@@ -6,7 +6,6 @@ import { Activity, Search, Bell, User } from "lucide-react";
 const tabs = [
   { label: "Home", href: "/" },
   { label: "Services", href: "/services" },
-  { label: "Incidents", href: "/incidents" },
   { label: "Logs", href: "/logs" },
   { label: "Traces", href: "/traces" },
 ];

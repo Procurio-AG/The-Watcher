@@ -118,11 +118,12 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.retention.time=3d"
+      - "--web.enable-remote-write-receiver"
     networks:
       - train-ticket-net
 
   loki:
-    image: grafana/loki:2.9.0
+    image: grafana/loki:3.0.0
     ports:
       - "3100:3100"
     volumes:
@@ -132,7 +133,7 @@ services:
       - train-ticket-net
 
   promtail:
-    image: grafana/promtail:2.9.0
+    image: grafana/promtail:3.0.0
     volumes:
       - ../../infrastructure/monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -152,6 +153,7 @@ services:
       - PROMETHEUS_URL=http://prometheus:9090
       - LOKI_URL=http://loki:3100
       - JAEGER_URL=http://jaeger:16686
+      - GROQ_API_KEY=${GROQ_API_KEY}
     depends_on:
       - prometheus
       - loki

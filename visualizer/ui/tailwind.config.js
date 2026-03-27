@@ -35,6 +35,12 @@ module.exports = {
         "3xl": "20px",
         "4xl": "24px",
       },
+      gridTemplateColumns: {
+        "dashboard": "5fr 3fr 4fr",
+      },
+      gridTemplateRows: {
+        "dashboard": "1fr auto 0.7fr",
+      },
     },
   },
   plugins: [],

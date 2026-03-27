@@ -26,7 +26,7 @@ export default function ServiceErrors() {
   const totalErrors = errorServices.reduce((sum: number, s: any) => sum + s.error_rate, 0);
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-surface-200 shadow-card card-hover">
+    <div className="bg-white rounded-3xl p-4 border border-surface-200 shadow-card card-hover h-full overflow-hidden">
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-[15px] font-semibold text-gray-900">Retention</h3>
         <button className="w-8 h-8 rounded-full hover:bg-surface-100 flex items-center justify-center transition-colors">

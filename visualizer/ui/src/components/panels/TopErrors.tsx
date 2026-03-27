@@ -34,7 +34,7 @@ export default function TopErrors() {
     .slice(0, 2);
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-surface-200 shadow-card card-hover">
+    <div className="bg-white rounded-3xl p-4 border border-surface-200 shadow-card card-hover h-full flex flex-col">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-[15px] font-semibold text-gray-900">Transactions</h3>
         <button className="w-8 h-8 rounded-full hover:bg-surface-100 flex items-center justify-center transition-colors">

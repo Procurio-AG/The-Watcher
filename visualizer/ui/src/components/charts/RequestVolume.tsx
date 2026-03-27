@@ -35,7 +35,7 @@ export default function RequestVolume() {
   const maxRps = Math.max(...chartData.map((d) => d.rps), 1);
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-surface-200 shadow-card card-hover">
+    <div className="bg-white rounded-3xl p-4 border border-surface-200 shadow-card card-hover h-full flex flex-col">
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-[15px] font-semibold text-gray-900">Request Volume</h3>
         <button className="w-8 h-8 rounded-full hover:bg-surface-100 flex items-center justify-center transition-colors">
@@ -43,11 +43,11 @@ export default function RequestVolume() {
         </button>
       </div>
       <div className="flex items-end gap-3 mb-4">
-        <span className="text-stat text-gray-900">{totalRps}</span>
-        <span className="text-[13px] text-gray-400 font-medium pb-1">req/s avg</span>
+        <span className="text-stat-sm text-gray-900">{totalRps}</span>
+        <span className="text-[12px] text-gray-400 font-medium pb-0.5">req/s avg</span>
       </div>
 
-      <div className="h-[160px]">
+      <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 0, right: 0, bottom: 0, left: -10 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0eeeb" vertical={false} />

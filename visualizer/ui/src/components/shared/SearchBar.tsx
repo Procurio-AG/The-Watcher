@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Search, Sparkles, ChevronUp } from "lucide-react";
+import { Search, Sparkles, ChevronUp, Loader2, X } from "lucide-react";
 import { askAI } from "@/hooks/useIncidents";
 
 export default function SearchBar() {
@@ -17,44 +17,67 @@ export default function SearchBar() {
       setResult(res.answer);
       setExpanded(true);
     } catch {
-      setResult(null);
+      setResult("Unable to analyze at this time. Please try again.");
+      setExpanded(true);
     }
     setLoading(false);
   };
 
+  const handleClear = () => {
+    setResult(null);
+    setExpanded(false);
+    setQuery("");
+  };
+
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-surface-200 shadow-card overflow-hidden">
-      <div className="flex items-center px-5 py-3.5">
-        <Sparkles className="w-4 h-4 text-amber-500 mr-2.5 flex-shrink-0" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-          placeholder="What would you like to explore next?"
-          className="flex-1 text-[13px] text-gray-700 placeholder-gray-400 bg-transparent focus:outline-none"
-        />
-        {result && (
+    <div className="relative">
+      <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-surface-200 shadow-card overflow-hidden">
+        <div className="flex items-center px-5 py-3">
+          <Sparkles className="w-4 h-4 text-amber-500 mr-2.5 flex-shrink-0" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            placeholder="What would you like to explore next?"
+            className="flex-1 text-[13px] text-gray-700 placeholder-gray-400 bg-transparent focus:outline-none"
+          />
+          {result && (
+            <>
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className="p-1 hover:bg-surface-100 rounded-lg mr-1"
+              >
+                <ChevronUp
+                  className={`w-4 h-4 text-gray-400 transition-transform ${expanded ? "" : "rotate-180"}`}
+                />
+              </button>
+              <button
+                onClick={handleClear}
+                className="p-1 hover:bg-surface-100 rounded-lg mr-1"
+              >
+                <X className="w-3.5 h-3.5 text-gray-400" />
+              </button>
+            </>
+          )}
           <button
-            onClick={() => setExpanded(!expanded)}
-            className="p-1 hover:bg-surface-100 rounded-lg mr-1"
+            onClick={handleSearch}
+            disabled={loading}
+            className="p-2 hover:bg-surface-100 rounded-xl transition-colors"
           >
-            <ChevronUp
-              className={`w-4 h-4 text-gray-400 transition-transform ${expanded ? "" : "rotate-180"}`}
-            />
+            {loading ? (
+              <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
+            ) : (
+              <Search className="w-4 h-4 text-gray-400" />
+            )}
           </button>
-        )}
-        <button
-          onClick={handleSearch}
-          disabled={loading}
-          className="p-2 hover:bg-surface-100 rounded-xl transition-colors"
-        >
-          <Search className="w-4 h-4 text-gray-400" />
-        </button>
+        </div>
       </div>
+
+      {/* Overlay result panel */}
       {result && expanded && (
-        <div className="px-5 pb-4 border-t border-surface-200">
-          <p className="text-[13px] text-gray-600 pt-3 leading-relaxed">{result}</p>
+        <div className="absolute left-0 right-0 top-full mt-2 z-20 bg-white rounded-2xl border border-surface-200 shadow-card-hover p-4 max-h-[200px] overflow-y-auto">
+          <p className="text-[13px] text-gray-600 leading-relaxed whitespace-pre-wrap">{result}</p>
         </div>
       )}
     </div>

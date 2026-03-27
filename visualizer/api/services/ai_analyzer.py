@@ -1,3 +1,7 @@
+import json
+import os
+
+from groq import Groq
 from services.prometheus_client import instant_query
 
 SERVICES = [
@@ -14,7 +18,6 @@ async def analyze_incidents() -> dict:
     for svc in SERVICES:
         job = svc
         try:
-            # Error rate
             err_result = await instant_query(
                 f'sum(rate(http_requests_total{{job="{job}",status=~"5.."}}[5m])) '
                 f'/ sum(rate(http_requests_total{{job="{job}"}}[5m])) * 100'
@@ -24,7 +27,6 @@ async def analyze_incidents() -> dict:
             error_rate = 0.0
 
         try:
-            # P95 latency
             lat_result = await instant_query(
                 f'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{{job="{job}"}}[5m])) by (le))'
             )
@@ -85,10 +87,53 @@ async def analyze_incidents() -> dict:
 
 
 async def ask_ai(question: str) -> dict:
-    """Process a natural language question about system health."""
+    """Process a natural language question about system health using Groq API."""
     analysis = await analyze_incidents()
 
-    # Simple keyword-based response generation
+    # Build context from real metrics
+    system_prompt = (
+        "You are an AI observability assistant for a microservices train ticket booking system. "
+        "Answer concisely (2-3 sentences max) about system health, performance, and incidents. "
+        "Be specific — reference actual service names, error rates, and latency numbers from the context.\n\n"
+        f"Current system state:\n"
+        f"- Severity: {analysis['severity']}\n"
+        f"- Root cause service: {analysis['root_cause_service']}\n"
+        f"- Confidence: {analysis['confidence']}%\n"
+        f"- Service health:\n{json.dumps(analysis['service_health'], indent=2)}"
+    )
+
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    if not groq_api_key:
+        # Fallback to heuristic response if no API key
+        return _fallback_response(question, analysis)
+
+    try:
+        client = Groq(api_key=groq_api_key)
+        chat = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            max_tokens=300,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": question},
+            ],
+        )
+        answer = chat.choices[0].message.content
+    except Exception as e:
+        # Fallback on error
+        return _fallback_response(question, analysis)
+
+    return {
+        "question": question,
+        "answer": answer,
+        "context": {
+            "severity": analysis["severity"],
+            "root_cause": analysis["root_cause_service"],
+        },
+    }
+
+
+def _fallback_response(question: str, analysis: dict) -> dict:
+    """Keyword-based fallback when Groq API is unavailable."""
     question_lower = question.lower()
 
     if "latency" in question_lower or "slow" in question_lower:
