@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { Loader2, Search, Sparkles, AlertTriangle, CheckCircle2, Train } from "lucide-react";
 import { useOverview, useLatencySeries, useErrorSeries, type MetricsRange } from "@/hooks/useMetrics";
 import { useCurrentIncident, askAI } from "@/hooks/useIncidents";
+import SimulationControl from "@/components/panels/SimulationControl";
 import { apiFetch } from "@/lib/api";
 import { formatDuration, trendArrow } from "@/lib/utils";
 
@@ -106,17 +107,20 @@ export default function SystemOverviewPage() {
             </div>
 
             {/* Range Selector */}
-            <div className="glass-pill">
-              <span className="text-[11px] text-[#999]">Range</span>
-              <select
-                value={range}
-                onChange={(e) => setRange(e.target.value as MetricsRange)}
-                className="bg-transparent text-[13px] font-semibold text-[#333] outline-none"
-              >
-                <option value="15m">15 min</option>
-                <option value="1h">1 hour</option>
-                <option value="6h">6 hours</option>
-              </select>
+            <div className="flex items-center gap-2">
+              <div className="glass-pill">
+                <span className="text-[11px] text-[#999]">Range</span>
+                <select
+                  value={range}
+                  onChange={(e) => setRange(e.target.value as MetricsRange)}
+                  className="bg-transparent text-[13px] font-semibold text-[#333] outline-none"
+                >
+                  <option value="15m">15 min</option>
+                  <option value="1h">1 hour</option>
+                  <option value="6h">6 hours</option>
+                </select>
+              </div>
+              <SimulationControl />
             </div>
           </div>
 
