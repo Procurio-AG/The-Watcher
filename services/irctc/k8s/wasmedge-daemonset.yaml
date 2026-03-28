@@ -59,6 +59,12 @@ spec:
           value: "12"
         - name: MAX_REPLICAS
           value: "5"
+        - name: PUSHGATEWAY_URL
+          value: "http://pushgateway-service:9091"
+        - name: SOFTMAX_TEMPERATURE
+          value: "1.5"
+        - name: CIRCUIT_BREAKER_ENABLED
+          value: "true"
         resources:
           requests:
             cpu: 50m

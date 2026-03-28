@@ -37,7 +37,18 @@ spec:
     failureThreshold: 3        # After 3 failed polls, fall back to replicas below
     replicas: 2
   triggers:
-    # Scale on request rate — scales when RPS exceeds 50 per pod
+    # ML anomaly score — multi-modal signal (logs + traces + metrics)
+    # Drives proportional scaling: 0.25→1x, 0.50→2x, 0.75→3x, 1.0→4x replicas
+    # Stale-metric guard: ignores scores older than 120s (edge-remedy down)
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: watcher_anomaly_score{exported_service="payment-service"} and (time() - watcher_last_push_timestamp{exported_service="payment-service"} < 120)
+        threshold: "0.25"
+        activationThreshold: "0.15"
+      authenticationRef:
+        name: prometheus-trigger-auth
+    # Scale on request rate — safety net when ML misses traffic spikes
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-service:9090
@@ -46,7 +57,7 @@ spec:
         activationThreshold: "5"
       authenticationRef:
         name: prometheus-trigger-auth
-    # Scale on P95 latency — if latency exceeds 1.5s, add capacity
+    # Scale on P95 latency — safety net if latency exceeds 1.5s
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-service:9090
@@ -55,7 +66,7 @@ spec:
         activationThreshold: "0.5"
       authenticationRef:
         name: prometheus-trigger-auth
-    # Scale on error rate — if 5xx rate exceeds 5/s, add capacity
+    # Scale on error rate — safety net if 5xx rate exceeds 5/s
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-service:9090
@@ -99,6 +110,16 @@ spec:
     failureThreshold: 3
     replicas: 2
   triggers:
+    # ML anomaly score — multi-modal signal (logs + traces + metrics)
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: watcher_anomaly_score{exported_service="ticket-service"} and (time() - watcher_last_push_timestamp{exported_service="ticket-service"} < 120)
+        threshold: "0.25"
+        activationThreshold: "0.15"
+      authenticationRef:
+        name: prometheus-trigger-auth
+    # RPS safety net
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-service:9090
@@ -107,6 +128,7 @@ spec:
         activationThreshold: "10"
       authenticationRef:
         name: prometheus-trigger-auth
+    # P95 latency safety net
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-service:9090
@@ -150,6 +172,16 @@ spec:
     failureThreshold: 3
     replicas: 2
   triggers:
+    # ML anomaly score — multi-modal signal (logs + traces + metrics)
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: watcher_anomaly_score{exported_service="order-service"} and (time() - watcher_last_push_timestamp{exported_service="order-service"} < 120)
+        threshold: "0.25"
+        activationThreshold: "0.15"
+      authenticationRef:
+        name: prometheus-trigger-auth
+    # RPS safety net
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-service:9090
@@ -158,6 +190,7 @@ spec:
         activationThreshold: "5"
       authenticationRef:
         name: prometheus-trigger-auth
+    # P95 latency safety net
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-service:9090
@@ -166,6 +199,7 @@ spec:
         activationThreshold: "0.5"
       authenticationRef:
         name: prometheus-trigger-auth
+    # Error rate safety net
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-service:9090
@@ -210,6 +244,16 @@ spec:
     failureThreshold: 3
     replicas: 2
   triggers:
+    # ML anomaly score — multi-modal signal (logs + traces + metrics)
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: watcher_anomaly_score{exported_service="gateway-service"} and (time() - watcher_last_push_timestamp{exported_service="gateway-service"} < 120)
+        threshold: "0.25"
+        activationThreshold: "0.15"
+      authenticationRef:
+        name: prometheus-trigger-auth
+    # RPS safety net — gateway is the entry point
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-service:9090

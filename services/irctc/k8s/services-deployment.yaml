@@ -854,3 +854,46 @@ spec:
   ports:
   - port: 3100
     targetPort: 3100
+---
+## ── Prometheus Pushgateway ───────────────────────────────────────────────
+## Receives ML anomaly scores from edge-remedy and exposes them
+## for Prometheus to scrape. KEDA reads these metrics for scaling decisions.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pushgateway
+  namespace: train-ticket
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pushgateway
+  template:
+    metadata:
+      labels:
+        app: pushgateway
+    spec:
+      containers:
+      - name: pushgateway
+        image: prom/pushgateway:v1.9.0
+        ports:
+        - containerPort: 9091
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            cpu: 50m
+            memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pushgateway-service
+  namespace: train-ticket
+spec:
+  selector:
+    app: pushgateway
+  ports:
+  - port: 9091
+    targetPort: 9091

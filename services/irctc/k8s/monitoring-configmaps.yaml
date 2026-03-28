@@ -52,6 +52,11 @@ data:
       - job_name: "notification-service"
         static_configs:
           - targets: ["notification-service:8000"]
+
+      - job_name: "pushgateway"
+        honor_labels: true
+        static_configs:
+          - targets: ["pushgateway-service:9091"]
 ---
 apiVersion: v1
 kind: ConfigMap

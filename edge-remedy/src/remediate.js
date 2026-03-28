@@ -69,9 +69,11 @@ async function restartDeployment(service) {
 }
 
 /**
- * Scale up a deployment by 1 replica (up to MAX_REPLICAS).
+ * Circuit-breaker scale up — only called when Pushgateway is unreachable
+ * and KEDA cannot receive the ML anomaly score. Falls back to direct
+ * K8s API patching to ensure the service still gets scaled.
  */
-async function scaleUp(service) {
+export async function circuitBreakerScaleUp(service) {
   if (isOnCooldown(service, 'scale')) return false;
 
   try {
@@ -93,70 +95,28 @@ async function scaleUp(service) {
     );
 
     setCooldown(service, 'scale');
-    console.log(`[REMEDIATE] Scaled ${service} from ${current} to ${target} replicas`);
-    await publishRemediationEvent(service, `scale:${current}->${target}`, true);
+    console.log(`[CIRCUIT-BREAKER] Scaled ${service} from ${current} to ${target} replicas (Pushgateway fallback)`);
+    await publishRemediationEvent(service, `circuit-breaker-scale:${current}->${target}`, true);
     return true;
   } catch (err) {
-    console.error(`[REMEDIATE] Failed to scale ${service}:`, err.body?.message || err.message);
-    await publishRemediationEvent(service, 'scale', false);
-    return false;
-  }
-}
-
-/**
- * Proactively scale a deployment based on predictive forecast.
- * Unlike reactive scaleUp, this uses a dedicated cooldown key ('preScale')
- * and logs the forecasted reason for audit trails.
- */
-export async function preScale(service, reason) {
-  if (isOnCooldown(service, 'preScale')) return false;
-
-  try {
-    const { body: deployment } = await appsApi.readNamespacedDeployment(service, NAMESPACE);
-    const current = deployment.spec.replicas || 1;
-
-    if (current >= MAX_REPLICAS) {
-      console.log(`[PRE-SCALE] ${service} already at max replicas (${MAX_REPLICAS}), skipping.`);
-      return false;
-    }
-
-    const target = current + 1;
-    const patch = { spec: { replicas: target } };
-
-    await appsApi.patchNamespacedDeployment(
-      service, NAMESPACE, patch,
-      undefined, undefined, undefined, undefined,
-      { headers: { 'Content-Type': 'application/strategic-merge-patch+json' } }
-    );
-
-    setCooldown(service, 'preScale');
-    console.log(`[PRE-SCALE] Proactively scaled ${service} from ${current} to ${target} replicas`);
-    console.log(`[PRE-SCALE] Reason: ${reason}`);
-    await publishRemediationEvent(service, `preScale:${current}->${target}`, true);
-    return true;
-  } catch (err) {
-    console.error(`[PRE-SCALE] Failed to pre-scale ${service}:`, err.body?.message || err.message);
-    await publishRemediationEvent(service, 'preScale', false);
+    console.error(`[CIRCUIT-BREAKER] Failed to scale ${service}:`, err.body?.message || err.message);
+    await publishRemediationEvent(service, 'circuit-breaker-scale', false);
     return false;
   }
 }
 
 /**
  * Execute remediation based on anomaly state from the ONNX model.
+ * Only handles restart — scaling is now driven by KEDA via the
+ * watcher_anomaly_score Prometheus metric pushed to Pushgateway.
+ *
  *   State 0 = healthy (no action)
  *   State 1 = anomaly detected → restart pod
- *   State 2+ = severe anomaly → restart + scale up
+ *   State 2+ = severe anomaly → restart pod (scaling via KEDA)
  */
 export async function remediate(service, state) {
   if (state === 0) return;
 
   console.log(`[REMEDIATE] Handling state ${state} for ${service}`);
-
-  if (state === 1) {
-    await restartDeployment(service);
-  } else {
-    // Severe: restart and scale
-    await restartDeployment(service);
-    await scaleUp(service);
-  }
+  await restartDeployment(service);
 }
