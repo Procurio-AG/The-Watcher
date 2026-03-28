@@ -60,7 +60,7 @@ spec:
           limits:
             cpu: 100m
             memory: 96Mi
----
+           
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -113,7 +113,7 @@ spec:
           limits:
             cpu: 100m
             memory: 96Mi
----
+           
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -166,7 +166,7 @@ spec:
           limits:
             cpu: 100m
             memory: 96Mi
----
+            
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -219,3 +219,4 @@ spec:
           limits:
             cpu: 100m
             memory: 96Mi
+           

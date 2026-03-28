@@ -1,0 +1,28 @@
+{
+  "base_url": "http://localhost:8000",
+  "default_user_id": "1",
+  "prometheus": {
+    "remote_write_url": "http://localhost:9090/api/v1/write",
+    "enabled": false
+  },
+  "thresholds": {
+    "p95_latency_ms": 2000,
+    "error_rate_percent": 5,
+    "detection_window_seconds": 15
+  },
+  "endpoints": {
+    "stations":  "/stations",
+    "routes":    "/routes",
+    "tickets":   "/tickets",
+    "orders":    "/orders",
+    "payments":  "/payments",
+    "notify":    "/notify",
+    "login":     "/login"
+  },
+  "seed_data": {
+    "start_station_id": "1",
+    "end_station_id": "2",
+    "ticket_id": "1",
+    "ticket_price": 100.0
+  }
+}
