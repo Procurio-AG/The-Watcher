@@ -55,12 +55,12 @@ spec:
           value: "train-ticket"
         resources:
           requests:
-            cpu: 25m
-            memory: 48Mi
+            cpu: 50m
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
-           
+            cpu: 200m
+            memory: 256Mi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -108,12 +108,12 @@ spec:
           value: "train-ticket"
         resources:
           requests:
-            cpu: 25m
-            memory: 48Mi
+            cpu: 50m
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
-           
+            cpu: 200m
+            memory: 256Mi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -161,12 +161,12 @@ spec:
           value: "train-ticket"
         resources:
           requests:
-            cpu: 25m
-            memory: 48Mi
+            cpu: 50m
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
-            
+            cpu: 200m
+            memory: 256Mi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -214,9 +214,8 @@ spec:
           value: "train-ticket"
         resources:
           requests:
-            cpu: 25m
-            memory: 48Mi
+            cpu: 50m
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
-           
+            cpu: 200m
+            memory: 256Mi

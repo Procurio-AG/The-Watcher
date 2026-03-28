@@ -38,6 +38,7 @@ build/
 
 # Virtual environments
 venv/
+ppenv/
 .venv/
 env/
 ENV/
@@ -58,6 +59,7 @@ htmlcov/
 *.pkl
 *.claude/
 
+central_brain/.env
 # =========================
 # Node.js / Frontend (React / Next.js)
 # =========================
