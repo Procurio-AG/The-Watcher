@@ -57,7 +57,7 @@ htmlcov/
 #*.onnx
 *.joblib
 *.pkl
-*.claude/
+.claude/
 
 central_brain/.env
 # =========================

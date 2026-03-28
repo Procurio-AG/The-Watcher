@@ -1,8 +1,8 @@
 {
   "name": "edge-remedy",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Edge-tier observability and remediation agent",
+  "main": "src/poller.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/poller.js"
