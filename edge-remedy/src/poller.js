@@ -1,7 +1,8 @@
-import { predict } from './wasm.js';
-import { remediate, preScale } from './remediate.js';
+import { predict, softmax } from './wasm.js';
+import { remediate, circuitBreakerScaleUp } from './remediate.js';
 import { publishAnomalyEvent } from './nats-publisher.js';
 import { forecast } from './forecaster.js';
+import { pushMetrics, pushForecastMetric } from './metrics-pusher.js';
 
 const PROMETHEUS_URL = process.env.PROMETHEUS_URL || 'http://localhost:9090';
 const LOKI_URL = process.env.LOKI_URL || 'http://localhost:3100';
@@ -10,6 +11,8 @@ const JAEGER_URL = process.env.JAEGER_URL || 'http://localhost:16686';
 const TARGET_SERVICE = process.env.TARGET_SERVICE || 'payment-service';
 const REMEDIATION_ENABLED = process.env.REMEDIATION_ENABLED !== 'false'; // on by default
 const PREDICTIVE_SCALING_ENABLED = process.env.PREDICTIVE_SCALING_ENABLED !== 'false'; // on by default
+const CIRCUIT_BREAKER_ENABLED = process.env.CIRCUIT_BREAKER_ENABLED !== 'false'; // on by default
+const SOFTMAX_TEMPERATURE = parseFloat(process.env.SOFTMAX_TEMPERATURE || '1.5');
 const FORECAST_INTERVAL_MS = parseInt(process.env.FORECAST_INTERVAL_MS || '60000'); // run forecast every 60s
 const POLL_INTERVAL_MS = 2000;
 const FETCH_TIMEOUT_MS = 1500;
@@ -105,25 +108,45 @@ async function poll() {
       latency: metrics.latency,
       traceDuration
     });
-    
-    // 3. Compute argmax state
+
+    // 3. Compute softmax probabilities and argmax state
     const logitsArray = Array.from(outputLogits);
-    const maxLogit = Math.max(...logitsArray);
-    const state = logitsArray.indexOf(maxLogit);
-    
+    const probs = softmax(logitsArray, SOFTMAX_TEMPERATURE);
+    const anomalyScore = probs[1] + probs[2]; // P(class1) + P(class2)
+    const state = logitsArray.indexOf(Math.max(...logitsArray));
+
     console.log(`\n[WASM RESULT] Logits: [${logitsArray.map(l => l.toFixed(3)).join(', ')}]`);
-    
-    if (state === 0) {
-      console.log(`[STATUS] ✅ State 0 (Healthy). No action required.`);
+    console.log(`[SOFTMAX]     Probs:  [${probs.map(p => p.toFixed(4)).join(', ')}] (T=${SOFTMAX_TEMPERATURE})`);
+    console.log(`[SOFTMAX]     Anomaly Score: ${anomalyScore.toFixed(4)}`);
+
+    // 4. Always push metric to Pushgateway (healthy or not) so KEDA has a fresh value
+    const pushResult = await pushMetrics(TARGET_SERVICE, anomalyScore, state);
+
+    if (pushResult.success) {
+      console.log(`[METRICS-PUSH] Pushed anomaly_score=${anomalyScore.toFixed(4)} to Pushgateway`);
     } else {
-      console.warn(`[WARNING] 🚨 State ${state} Anomaly detected! Edge Wasm emitting remediation signal.`);
+      console.warn(`[METRICS-PUSH] Failed to push to Pushgateway`);
+    }
+
+    // 5. Act on anomaly
+    if (state === 0) {
+      console.log(`[STATUS] State 0 (Healthy). No action required.`);
+    } else {
+      console.warn(`[WARNING] State ${state} Anomaly detected! anomaly_score=${anomalyScore.toFixed(4)}`);
 
       // Publish to NATS for LangGraph brain (Phase 3 deep RCA)
       await publishAnomalyEvent(TARGET_SERVICE, state, { cpu: metrics.cpu, latency: metrics.latency, traceDuration });
 
-      // Execute immediate K8s remediation (Tier 1)
       if (REMEDIATION_ENABLED) {
+        // Restart is always direct — HPA cannot restart pods
         await remediate(TARGET_SERVICE, state);
+
+        // Scaling: KEDA handles it via the pushed anomaly_score metric.
+        // Circuit breaker: if Pushgateway is down, fall back to direct K8s scale.
+        if (!pushResult.success && CIRCUIT_BREAKER_ENABLED) {
+          console.warn(`[CIRCUIT-BREAKER] Pushgateway unreachable, falling back to direct scale`);
+          await circuitBreakerScaleUp(TARGET_SERVICE);
+        }
       } else {
         console.log(`[REMEDIATE] Remediation disabled (REMEDIATION_ENABLED=false). Skipping.`);
       }
@@ -152,12 +175,21 @@ async function predictiveScalingPass() {
       console.log(`[FORECAST] Current avg RPS: ${result.currentAvgRps?.toFixed(1)}`);
     }
 
+    // Push forecast metric to Pushgateway — KEDA uses this alongside anomaly_score
+    const forecastPush = await pushForecastMetric(TARGET_SERVICE, result.shouldPreScale);
+
     if (result.shouldPreScale) {
-      console.warn(`[FORECAST] 🔮 Predictive spike detected — pre-scaling ${TARGET_SERVICE}`);
+      console.warn(`[FORECAST] Predictive spike detected for ${TARGET_SERVICE}`);
       console.warn(`[FORECAST] ${result.reason}`);
-      await preScale(TARGET_SERVICE, result.reason);
+
+      if (forecastPush.success) {
+        console.log(`[FORECAST] Pushed forecast_spike=1 to Pushgateway — KEDA will handle scaling`);
+      } else if (CIRCUIT_BREAKER_ENABLED && REMEDIATION_ENABLED) {
+        console.warn(`[CIRCUIT-BREAKER] Pushgateway unreachable during forecast, falling back to direct scale`);
+        await circuitBreakerScaleUp(TARGET_SERVICE);
+      }
     } else {
-      console.log(`[FORECAST] ✅ No predicted spike. Holding steady.`);
+      console.log(`[FORECAST] No predicted spike. Holding steady.`);
     }
   } catch (err) {
     console.error(`[FORECAST] Error in predictive pass:`, err.message);

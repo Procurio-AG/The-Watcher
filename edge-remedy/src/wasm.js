@@ -32,6 +32,19 @@ async function getSession() {
   return _session;
 }
 
+/**
+ * Temperature-scaled softmax — converts raw logits to probabilities.
+ * T > 1 spreads the distribution (prevents overconfident outputs).
+ * T < 1 sharpens it. T = 1 is standard softmax.
+ */
+export function softmax(logits, temperature = 1.0) {
+  const scaled = logits.map(l => l / temperature);
+  const maxVal = Math.max(...scaled); // subtract max for numerical stability
+  const exps = scaled.map(l => Math.exp(l - maxVal));
+  const sumExp = exps.reduce((a, b) => a + b, 0);
+  return exps.map(e => e / sumExp);
+}
+
 export async function predict({ logLine, cpu, latency, traceDuration }) {
   const session = await getSession();
   const ids = tokenize(logLine);
