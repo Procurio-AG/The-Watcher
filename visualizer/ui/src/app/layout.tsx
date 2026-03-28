@@ -8,16 +8,29 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const themeBootScript = `
+    (() => {
+      const key = "watcher-theme-mode";
+      const stored = localStorage.getItem(key);
+      const mode = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
+      const resolved = mode === "system"
+        ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        : mode;
+      document.documentElement.setAttribute("data-theme", resolved);
+    })();
+  `;
+
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+      </head>
       <body>
-        <div className="h-full w-full p-4 md:p-6">
-          <div className="app-shell">
-            <Sidebar />
-            <main className="min-h-0 flex-1 overflow-auto px-4 pb-4 md:px-6 md:pb-6">
-              {children}
-            </main>
-          </div>
+        <div className="app-shell">
+          <Sidebar />
+          <main className="hide-scrollbar min-h-0 flex-1 overflow-auto px-5 pb-5 md:px-6 md:pb-6">
+            {children}
+          </main>
         </div>
       </body>
     </html>

@@ -1,0 +1,21 @@
+{
+  "base_url": "http://localhost:8000",
+  "default_user_id": "user-001",
+  "endpoints": {
+    "stations": "/stations",
+    "tickets": "/tickets",
+    "orders": "/orders",
+    "payments": "/payments",
+    "notify": "/notify"
+  },
+  "seed_data": {
+    "start_station_id": 1,
+    "end_station_id": 2,
+    "ticket_id": 1,
+    "ticket_price": 500
+  },
+  "thresholds": {
+    "p95_latency_ms": 2000,
+    "error_rate": 0.01
+  }
+}

@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Play, Zap } from "lucide-react";
+import { Loader2, Zap } from "lucide-react";
 import { startAttackResolveSimulation, useSimulationStatus } from "@/hooks/useSimulation";
 
 const tone: Record<string, string> = {
-  idle: "bg-[#f3f2ef] text-[#7a7a7a]",
-  running: "bg-[#eef4ff] text-[#5d88dd]",
-  completed: "bg-[#ecf8ef] text-[#46a064]",
-  failed: "bg-[#fff0f1] text-[#ca6870]",
+  idle: "bg-[color:var(--control-bg)] text-[color:var(--text-secondary)]",
+  running: "status-chip-info",
+  completed: "status-chip-success",
+  failed: "status-chip-danger",
 };
 
 export default function SimulationControl() {
@@ -36,7 +36,7 @@ export default function SimulationControl() {
       <button
         onClick={handleStart}
         disabled={running || starting}
-        className="glass-pill inline-flex items-center gap-2 border-[#e7e2db] bg-white px-4 py-2 font-semibold text-[#303030] transition-all hover:border-[#d4cfc7] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70"
+        className="dashboard-select inline-flex items-center gap-2 border-[color:var(--card-border)] bg-[color:var(--control-bg)] px-4 py-2 font-semibold text-[color:var(--text-primary)] transition-all hover:bg-[color:var(--control-bg-hover)] disabled:cursor-not-allowed disabled:opacity-70"
       >
         {running || starting ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
