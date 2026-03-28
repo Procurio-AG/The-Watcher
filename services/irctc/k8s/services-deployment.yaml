@@ -56,10 +56,10 @@ spec:
         resources:
           requests:
             cpu: 50m
-            memory: 48Mi
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
+            cpu: 250m
+            memory: 320Mi
 ---
 apiVersion: v1
 kind: Service
@@ -128,10 +128,10 @@ spec:
         resources:
           requests:
             cpu: 50m
-            memory: 48Mi
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
+            cpu: 250m
+            memory: 320Mi
 ---
 apiVersion: v1
 kind: Service
@@ -200,10 +200,10 @@ spec:
         resources:
           requests:
             cpu: 50m
-            memory: 48Mi
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
+            cpu: 250m
+            memory: 320Mi
 ---
 apiVersion: v1
 kind: Service
@@ -272,10 +272,10 @@ spec:
         resources:
           requests:
             cpu: 50m
-            memory: 48Mi
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
+            cpu: 250m
+            memory: 320Mi
 ---
 apiVersion: v1
 kind: Service
@@ -344,10 +344,10 @@ spec:
         resources:
           requests:
             cpu: 50m
-            memory: 48Mi
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
+            cpu: 250m
+            memory: 320Mi
 ---
 apiVersion: v1
 kind: Service
@@ -416,10 +416,10 @@ spec:
         resources:
           requests:
             cpu: 50m
-            memory: 48Mi
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
+            cpu: 250m
+            memory: 320Mi
 ---
 apiVersion: v1
 kind: Service
@@ -488,10 +488,10 @@ spec:
         resources:
           requests:
             cpu: 50m
-            memory: 48Mi
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
+            cpu: 250m
+            memory: 320Mi
 ---
 apiVersion: v1
 kind: Service
@@ -560,10 +560,10 @@ spec:
         resources:
           requests:
             cpu: 50m
-            memory: 48Mi
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
+            cpu: 250m
+            memory: 320Mi
 ---
 apiVersion: v1
 kind: Service
@@ -632,10 +632,10 @@ spec:
         resources:
           requests:
             cpu: 50m
-            memory: 48Mi
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
+            cpu: 250m
+            memory: 320Mi
 ---
 apiVersion: v1
 kind: Service
@@ -704,10 +704,10 @@ spec:
         resources:
           requests:
             cpu: 50m
-            memory: 48Mi
+            memory: 128Mi
           limits:
-            cpu: 100m
-            memory: 96Mi
+            cpu: 250m
+            memory: 320Mi
 ---
 apiVersion: v1
 kind: Service

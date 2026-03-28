@@ -1,6 +1,7 @@
 import client from 'prom-client';
 
 const PUSHGATEWAY_URL = process.env.PUSHGATEWAY_URL || 'http://pushgateway-service:9091';
+const TARGET_SERVICE = process.env.TARGET_SERVICE || 'payment-service';
 const JOB_NAME = 'edge-remedy';
 
 // --- Gauges ---
@@ -36,7 +37,7 @@ registry.registerMetric(anomalyStateGauge);
 registry.registerMetric(forecastSpikeGauge);
 registry.registerMetric(lastPushTimestampGauge);
 
-const gateway = new client.Pushgateway(PUSHGATEWAY_URL, [], registry);
+const gateway = new client.Pushgateway(PUSHGATEWAY_URL, {}, registry);
 
 /**
  * Push ML anomaly metrics to Prometheus Pushgateway.
@@ -52,7 +53,7 @@ export async function pushMetrics(service, anomalyScore, state) {
   lastPushTimestampGauge.set({ exported_service: service }, Math.floor(Date.now() / 1000));
 
   try {
-    await gateway.pushAdd({ jobName: JOB_NAME });
+    await gateway.pushAdd({ jobName: JOB_NAME, groupings: { instance: TARGET_SERVICE } });
     return { success: true };
   } catch (err) {
     console.error(`[METRICS-PUSH] Failed to push to Pushgateway at ${PUSHGATEWAY_URL}:`, err.message);
@@ -72,7 +73,7 @@ export async function pushForecastMetric(service, spikeDetected) {
   lastPushTimestampGauge.set({ exported_service: service }, Math.floor(Date.now() / 1000));
 
   try {
-    await gateway.pushAdd({ jobName: JOB_NAME });
+    await gateway.pushAdd({ jobName: JOB_NAME, groupings: { instance: TARGET_SERVICE } });
     return { success: true };
   } catch (err) {
     console.error(`[METRICS-PUSH] Failed to push forecast metric:`, err.message);

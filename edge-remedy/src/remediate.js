@@ -1,4 +1,4 @@
-import k8s from '@kubernetes/client-node';
+import * as k8s from '@kubernetes/client-node';
 import { publishRemediationEvent } from './nats-publisher.js';
 
 const NAMESPACE = process.env.K8S_NAMESPACE || 'train-ticket';
