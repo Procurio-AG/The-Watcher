@@ -148,12 +148,41 @@ services:
     networks:
       - train-ticket-net
 
+  pushgateway:
+    image: prom/pushgateway:v1.9.0
+    ports:
+      - "9091:9091"
+    networks:
+      - train-ticket-net
+
+  edge-remedy:
+    build:
+      context: ../../edge-remedy
+    environment:
+      - TARGET_SERVICE=payment-service
+      - PROMETHEUS_URL=http://prometheus:9090
+      - LOKI_URL=http://loki:3100
+      - JAEGER_URL=http://jaeger:16686
+      - PUSHGATEWAY_URL=http://pushgateway:9091
+      - REMEDIATION_ENABLED=false
+      - CIRCUIT_BREAKER_ENABLED=false
+      - PREDICTIVE_SCALING_ENABLED=true
+      - SOFTMAX_TEMPERATURE=1.5
+    depends_on:
+      - prometheus
+      - loki
+      - jaeger
+      - pushgateway
+    networks:
+      - train-ticket-net
+
   visualizer-api:
     build:
       context: ../../visualizer/api
     ports:
-      - "8081:8080"
+      - "8081:8081"
     environment:
+      - PORT=8081
       - PROMETHEUS_URL=http://prometheus:9090
       - LOKI_URL=http://loki:3100
       - JAEGER_URL=http://jaeger:16686
@@ -171,7 +200,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: http://localhost:8081
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
       - visualizer-api
     networks:

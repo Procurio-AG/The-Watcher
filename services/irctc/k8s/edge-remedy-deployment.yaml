@@ -1,0 +1,253 @@
+## Edge-Remedy Deployments — one instance per KEDA-scaled service
+## Each instance runs the ONNX anomaly-detection poller against a single
+## target service and pushes watcher_anomaly_score to Pushgateway.
+## KEDA ScaledObjects consume these metrics for ML-driven autoscaling.
+##
+## Prerequisites:
+##   - Pushgateway deployed (see services-deployment.yaml)
+##   - Prometheus scraping Pushgateway with honor_labels: true
+##   - NATS server if LangGraph integration is enabled
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-remedy-payment
+  namespace: train-ticket
+  labels:
+    app: edge-remedy
+    target-service: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-remedy
+      target-service: payment-service
+  template:
+    metadata:
+      labels:
+        app: edge-remedy
+        target-service: payment-service
+    spec:
+      containers:
+      - name: edge-remedy
+        image: edge-remedy:latest
+        imagePullPolicy: Never
+        env:
+        - name: TARGET_SERVICE
+          value: "payment-service"
+        - name: PROMETHEUS_URL
+          value: "http://prometheus-service:9090"
+        - name: LOKI_URL
+          value: "http://loki-service:3100"
+        - name: JAEGER_URL
+          value: "http://jaeger-service:16686"
+        - name: PUSHGATEWAY_URL
+          value: "http://pushgateway-service:9091"
+        - name: REMEDIATION_ENABLED
+          value: "true"
+        - name: PREDICTIVE_SCALING_ENABLED
+          value: "true"
+        - name: CIRCUIT_BREAKER_ENABLED
+          value: "true"
+        - name: SOFTMAX_TEMPERATURE
+          value: "1.5"
+        - name: K8S_NAMESPACE
+          value: "train-ticket"
+        resources:
+          requests:
+<<<<<<< HEAD
+            cpu: 25m
+            memory: 48Mi
+          limits:
+            cpu: 100m
+            memory: 96Mi
+=======
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+>>>>>>> 1c321b9 (feat: ML pipeline in KEDA HPA)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-remedy-ticket
+  namespace: train-ticket
+  labels:
+    app: edge-remedy
+    target-service: ticket-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-remedy
+      target-service: ticket-service
+  template:
+    metadata:
+      labels:
+        app: edge-remedy
+        target-service: ticket-service
+    spec:
+      containers:
+      - name: edge-remedy
+        image: edge-remedy:latest
+        imagePullPolicy: Never
+        env:
+        - name: TARGET_SERVICE
+          value: "ticket-service"
+        - name: PROMETHEUS_URL
+          value: "http://prometheus-service:9090"
+        - name: LOKI_URL
+          value: "http://loki-service:3100"
+        - name: JAEGER_URL
+          value: "http://jaeger-service:16686"
+        - name: PUSHGATEWAY_URL
+          value: "http://pushgateway-service:9091"
+        - name: REMEDIATION_ENABLED
+          value: "true"
+        - name: PREDICTIVE_SCALING_ENABLED
+          value: "true"
+        - name: CIRCUIT_BREAKER_ENABLED
+          value: "true"
+        - name: SOFTMAX_TEMPERATURE
+          value: "1.5"
+        - name: K8S_NAMESPACE
+          value: "train-ticket"
+        resources:
+          requests:
+<<<<<<< HEAD
+            cpu: 25m
+            memory: 48Mi
+          limits:
+            cpu: 100m
+            memory: 96Mi
+=======
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+>>>>>>> 1c321b9 (feat: ML pipeline in KEDA HPA)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-remedy-order
+  namespace: train-ticket
+  labels:
+    app: edge-remedy
+    target-service: order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-remedy
+      target-service: order-service
+  template:
+    metadata:
+      labels:
+        app: edge-remedy
+        target-service: order-service
+    spec:
+      containers:
+      - name: edge-remedy
+        image: edge-remedy:latest
+        imagePullPolicy: Never
+        env:
+        - name: TARGET_SERVICE
+          value: "order-service"
+        - name: PROMETHEUS_URL
+          value: "http://prometheus-service:9090"
+        - name: LOKI_URL
+          value: "http://loki-service:3100"
+        - name: JAEGER_URL
+          value: "http://jaeger-service:16686"
+        - name: PUSHGATEWAY_URL
+          value: "http://pushgateway-service:9091"
+        - name: REMEDIATION_ENABLED
+          value: "true"
+        - name: PREDICTIVE_SCALING_ENABLED
+          value: "true"
+        - name: CIRCUIT_BREAKER_ENABLED
+          value: "true"
+        - name: SOFTMAX_TEMPERATURE
+          value: "1.5"
+        - name: K8S_NAMESPACE
+          value: "train-ticket"
+        resources:
+          requests:
+<<<<<<< HEAD
+            cpu: 25m
+            memory: 48Mi
+          limits:
+            cpu: 100m
+            memory: 96Mi
+=======
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+>>>>>>> 1c321b9 (feat: ML pipeline in KEDA HPA)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-remedy-gateway
+  namespace: train-ticket
+  labels:
+    app: edge-remedy
+    target-service: gateway-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-remedy
+      target-service: gateway-service
+  template:
+    metadata:
+      labels:
+        app: edge-remedy
+        target-service: gateway-service
+    spec:
+      containers:
+      - name: edge-remedy
+        image: edge-remedy:latest
+        imagePullPolicy: Never
+        env:
+        - name: TARGET_SERVICE
+          value: "gateway-service"
+        - name: PROMETHEUS_URL
+          value: "http://prometheus-service:9090"
+        - name: LOKI_URL
+          value: "http://loki-service:3100"
+        - name: JAEGER_URL
+          value: "http://jaeger-service:16686"
+        - name: PUSHGATEWAY_URL
+          value: "http://pushgateway-service:9091"
+        - name: REMEDIATION_ENABLED
+          value: "true"
+        - name: PREDICTIVE_SCALING_ENABLED
+          value: "true"
+        - name: CIRCUIT_BREAKER_ENABLED
+          value: "true"
+        - name: SOFTMAX_TEMPERATURE
+          value: "1.5"
+        - name: K8S_NAMESPACE
+          value: "train-ticket"
+        resources:
+          requests:
+<<<<<<< HEAD
+            cpu: 25m
+            memory: 48Mi
+          limits:
+            cpu: 100m
+            memory: 96Mi
+=======
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+>>>>>>> 1c321b9 (feat: ML pipeline in KEDA HPA)

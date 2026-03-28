@@ -9,7 +9,7 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-GATEWAY_URL = os.environ.get("GATEWAY_URL", "http://gateway-service:8000")
+GATEWAY_URL = os.environ.get("GATEWAY_URL", "http://localhost:8000")
 
 _lock = asyncio.Lock()
 _logs: deque[str] = deque(maxlen=200)
