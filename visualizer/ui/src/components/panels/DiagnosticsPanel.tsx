@@ -4,14 +4,22 @@ import { Activity, Server, TerminalSquare } from "lucide-react";
 import { useHealth } from "@/hooks/useHealth";
 import { useSimulationStatus } from "@/hooks/useSimulation";
 
+const statusColor: Record<string, string> = {
+  idle: "text-[#7a7a7a]",
+  running: "text-[#5d88dd]",
+  completed: "text-[#46a064]",
+  failed: "text-[#ca6870]",
+};
+
 export default function DiagnosticsPanel() {
   const { data: health } = useHealth();
   const { data: simulation } = useSimulationStatus();
 
-  const recentLogs = simulation?.logs?.slice(-3).reverse() || [];
+  const recentLogs = simulation?.logs?.slice(-8).reverse() || [];
+  const simStatus = simulation?.status || "idle";
 
   return (
-    <div className="glass-card flex h-full flex-col p-5">
+    <div className="glass-card flex flex-col p-5">
       <div className="mb-4 flex items-center gap-2">
         <Server className="h-4 w-4 text-[#5f86d9]" />
         <h3 className="text-[15px] font-semibold text-[#2c2c2c]">Diagnostics</h3>
@@ -33,13 +41,13 @@ export default function DiagnosticsPanel() {
             <TerminalSquare className="h-4 w-4 text-[#5f86d9]" />
             Simulation
           </div>
-          <div className="mt-2 text-[22px] font-semibold tracking-[-0.04em] capitalize text-[#1f1f1f]">
-            {simulation?.status || "idle"}
+          <div className={`mt-2 text-[22px] font-semibold tracking-[-0.04em] capitalize ${statusColor[simStatus]}`}>
+            {simStatus}
           </div>
         </div>
       </div>
 
-      <div className="mt-4 flex-1 overflow-hidden rounded-[18px] border border-[#efebe5] bg-white/74">
+      <div className="mt-4 overflow-hidden rounded-[18px] border border-[#efebe5] bg-white/74">
         <div className="border-b border-[#f1eeea] px-4 py-3 text-[12px] font-medium text-[#8b8b8b]">Dependency Status</div>
         <div className="space-y-2 px-4 py-3 text-[12px] text-[#666]">
           <div className="flex items-center justify-between">
@@ -57,20 +65,20 @@ export default function DiagnosticsPanel() {
         </div>
       </div>
 
-      <div className="mt-4 flex-1 overflow-hidden rounded-[18px] border border-[#efebe5] bg-white/74">
-        <div className="border-b border-[#f1eeea] px-4 py-3 text-[12px] font-medium text-[#8b8b8b]">Simulation Log Tail</div>
-        <div className="space-y-2 px-4 py-3">
-          {recentLogs.length > 0 ? (
-            recentLogs.map((line, index) => (
+      {recentLogs.length > 0 && (
+        <div className="mt-4 overflow-hidden rounded-[18px] border border-[#efebe5] bg-white/74">
+          <div className="border-b border-[#f1eeea] px-4 py-3 text-[12px] font-medium text-[#8b8b8b]">
+            Simulation Log
+          </div>
+          <div className="max-h-[200px] overflow-y-auto px-4 py-3 hide-scrollbar">
+            {recentLogs.map((line, index) => (
               <div key={`${index}-${line}`} className="font-mono text-[11px] leading-5 text-[#666]">
                 {line}
               </div>
-            ))
-          ) : (
-            <div className="text-[12px] text-[#9a9a9a]">No simulation output yet.</div>
-          )}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

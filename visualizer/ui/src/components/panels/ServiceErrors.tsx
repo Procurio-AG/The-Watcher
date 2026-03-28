@@ -35,7 +35,7 @@ export default function ServiceErrors({ range }: { range: MetricsRange }) {
   const colors = ["#ec8a89", "#efc667", "#b8e0c0"];
 
   return (
-    <div className="glass-card flex h-full flex-col p-5">
+    <div className="glass-card flex min-h-[280px] flex-col p-5">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-[15px] font-semibold text-[#2c2c2c]">Service Errors</h3>

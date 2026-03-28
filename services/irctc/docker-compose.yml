@@ -168,10 +168,10 @@ services:
   visualizer-ui:
     build:
       context: ../../visualizer/ui
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8081
     ports:
       - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8081
     depends_on:
       - visualizer-api
     networks:
