@@ -1,6 +1,6 @@
 import http from 'k6/http';
 import { sleep, check, group } from 'k6';
-import { getConfig, baseHeaders, checkResponse } from '../lib/helpers.js';
+import { getConfig, baseHeaders, chaosHeaders, checkResponse } from '../lib/helpers.js';
 import { attackPhaseActive, PHASE, ticketLatency, ticketConcurrency, buildSummaryHandler } from '../lib/prometheus.js';
 
 // ─── CPU Starvation Attack: Ticket Service ──────────────────────────────
@@ -108,7 +108,7 @@ export function baseline() {
 export function attack() {
   attackPhaseActive.add(PHASE.CPU_STARVATION);
   ticketConcurrency.add(__VU);
-  const headers = baseHeaders('cpu_starvation');
+  const headers = chaosHeaders('cpu_starvation', 'cpu');
 
   // Mix 1: Rapid-fire ticket searches with random params
   group('CPU Storm — Ticket Search', function () {

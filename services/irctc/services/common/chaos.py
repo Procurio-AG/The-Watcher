@@ -1,4 +1,5 @@
-import asyncio
+import time
+import math
 from typing import Callable
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -15,8 +16,20 @@ class ChaosMiddleware(BaseHTTPMiddleware):
             )
             
         if chaos_trigger == "latency":
-            # Forcing a 10s wait for latency-based 15-second SLA detection paths
-            await asyncio.sleep(10.0)
+            # BLOCKING sleep — this locks the uvicorn worker thread,
+            # causing all subsequent requests to queue up and genuinely
+            # spiking P95 latency across the service.
+            time.sleep(10.0)
+            
+        if chaos_trigger == "cpu":
+            # CPU burn — tight math loop for ~2 seconds.
+            # Each request consumes 100% of one CPU core for its duration,
+            # and with 150 concurrent VUs this will overwhelm the process.
+            end = time.monotonic() + 2.0
+            x = 0.0
+            while time.monotonic() < end:
+                for _ in range(10000):
+                    x += math.sin(x) * math.cos(x)
             
         response = await call_next(request)
         return response
