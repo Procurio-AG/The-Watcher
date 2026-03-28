@@ -14,6 +14,10 @@ app.add_middleware(ChaosMiddleware)
 Instrumentator().instrument(app).expose(app)
 logger = setup_logger("gateway-service")
 
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
 SERVICE_MAPPING = {
     "login": "auth-service",
     "verify": "auth-service",
@@ -41,7 +45,7 @@ async def proxy(service_prefix: str, request: Request, path: str = ""):
         
     logger.info(f"Proxying request to {upstream_url}")
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=3.0) as client:
         # Avoid passing fastAPI server headers that might cause issues with proxy 
         headers = dict(request.headers)
         headers.pop("host", None)

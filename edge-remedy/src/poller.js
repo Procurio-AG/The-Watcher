@@ -1,6 +1,7 @@
 import { predict } from './wasm.js';
-import { remediate } from './remediate.js';
+import { remediate, preScale } from './remediate.js';
 import { publishAnomalyEvent } from './nats-publisher.js';
+import { forecast } from './forecaster.js';
 
 const PROMETHEUS_URL = process.env.PROMETHEUS_URL || 'http://localhost:9090';
 const LOKI_URL = process.env.LOKI_URL || 'http://localhost:3100';
@@ -8,6 +9,8 @@ const JAEGER_URL = process.env.JAEGER_URL || 'http://localhost:16686';
 
 const TARGET_SERVICE = process.env.TARGET_SERVICE || 'payment-service';
 const REMEDIATION_ENABLED = process.env.REMEDIATION_ENABLED !== 'false'; // on by default
+const PREDICTIVE_SCALING_ENABLED = process.env.PREDICTIVE_SCALING_ENABLED !== 'false'; // on by default
+const FORECAST_INTERVAL_MS = parseInt(process.env.FORECAST_INTERVAL_MS || '60000'); // run forecast every 60s
 const POLL_INTERVAL_MS = 2000;
 const FETCH_TIMEOUT_MS = 1500;
 
@@ -130,8 +133,42 @@ async function poll() {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Predictive scaling loop — runs on a slower cadence than the reactive poller
+// ---------------------------------------------------------------------------
+async function predictiveScalingPass() {
+  if (!PREDICTIVE_SCALING_ENABLED || !REMEDIATION_ENABLED) return;
+
+  console.log(`\n--- [${new Date().toISOString()}] Predictive Forecast for ${TARGET_SERVICE} ---`);
+
+  try {
+    const result = await forecast();
+
+    if (result.forecastCpu) {
+      console.log(`[FORECAST] CPU forecast (next steps): [${result.forecastCpu.map(v => v.toFixed(1)).join(', ')}]%`);
+    }
+    if (result.forecastRps) {
+      console.log(`[FORECAST] RPS forecast (next steps): [${result.forecastRps.map(v => v.toFixed(1)).join(', ')}]`);
+      console.log(`[FORECAST] Current avg RPS: ${result.currentAvgRps?.toFixed(1)}`);
+    }
+
+    if (result.shouldPreScale) {
+      console.warn(`[FORECAST] 🔮 Predictive spike detected — pre-scaling ${TARGET_SERVICE}`);
+      console.warn(`[FORECAST] ${result.reason}`);
+      await preScale(TARGET_SERVICE, result.reason);
+    } else {
+      console.log(`[FORECAST] ✅ No predicted spike. Holding steady.`);
+    }
+  } catch (err) {
+    console.error(`[FORECAST] Error in predictive pass:`, err.message);
+  }
+}
+
 console.log(`Starting Edge Telemetry Poller for ${TARGET_SERVICE}`);
 console.log(`Polling every ${POLL_INTERVAL_MS}ms with a ${FETCH_TIMEOUT_MS}ms strict timeout.`);
+console.log(`Predictive scaling: ${PREDICTIVE_SCALING_ENABLED ? 'ENABLED' : 'DISABLED'} (every ${FORECAST_INTERVAL_MS / 1000}s)`);
 setInterval(poll, POLL_INTERVAL_MS);
-// Run initial pass immediately
+setInterval(predictiveScalingPass, FORECAST_INTERVAL_MS);
+// Run initial passes immediately
 poll();
+setTimeout(predictiveScalingPass, 5000); // slight delay to let first poll complete

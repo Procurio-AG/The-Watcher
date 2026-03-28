@@ -1,4 +1,4 @@
-import { trendColor, trendArrow } from "@/lib/utils";
+import { trendArrow } from "@/lib/utils";
 
 interface StatCardProps {
   label: string;
@@ -9,27 +9,31 @@ interface StatCardProps {
   subtitle?: string;
 }
 
-export default function StatCard({ label, value, delta, deltaLabel, inverse = true, subtitle }: StatCardProps) {
+export default function StatCard({
+  label,
+  value,
+  delta,
+  deltaLabel,
+  inverse = true,
+  subtitle,
+}: StatCardProps) {
+  const positiveIsBad = inverse && (delta || 0) > 0;
+  const chipClass = positiveIsBad
+    ? "bg-[rgba(239,68,68,0.12)] text-[#c95e66]"
+    : "bg-[rgba(143,254,1,0.15)] text-[#3a7a00]";
+
   return (
-    <div className="bg-white rounded-3xl p-6 border border-surface-200 shadow-card card-hover">
-      <p className="text-[13px] text-gray-500 font-medium tracking-wide mb-3">{label}</p>
-      <div className="flex items-end gap-3">
-        <span className="text-stat text-gray-900">{value}</span>
-        {delta !== undefined && Math.abs(delta) > 0.001 && (
-          <span
-            className={`text-[13px] font-semibold px-2 py-0.5 rounded-full ${
-              (inverse ? delta > 0 : delta < 0)
-                ? "bg-red-50 text-red-600"
-                : "bg-green-50 text-green-600"
-            }`}
-          >
+    <div className="min-w-0 p-6">
+      <p className="text-[13px] font-medium text-[#888]">{label}</p>
+      <div className="mt-3 flex items-end gap-3">
+        <span className="text-[42px] font-bold tracking-[-0.06em] text-[#1a1a1a]">{value}</span>
+        {delta !== undefined && Math.abs(delta) > 0.001 ? (
+          <span className={`mb-1 inline-flex rounded-full px-2.5 py-1 text-[12px] font-bold ${chipClass}`}>
             {trendArrow(delta)} {deltaLabel || Math.abs(delta).toFixed(1)}
           </span>
-        )}
+        ) : null}
       </div>
-      {subtitle && (
-        <p className="text-[12px] text-gray-400 mt-2">{subtitle}</p>
-      )}
+      {subtitle ? <p className="mt-2 text-[12px] text-[#aaa]">{subtitle}</p> : null}
     </div>
   );
 }

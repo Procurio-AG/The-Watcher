@@ -14,6 +14,10 @@ app.add_middleware(ChaosMiddleware)
 Instrumentator().instrument(app).expose(app)
 logger = setup_logger("notification-service")
 
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
 class NotificationReq(BaseModel):
     user_id: str
     message: str
