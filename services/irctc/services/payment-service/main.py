@@ -15,6 +15,10 @@ app.add_middleware(ChaosMiddleware)
 Instrumentator().instrument(app).expose(app)
 logger = setup_logger("payment-service")
 
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
 ORDER_SERVICE_URL = os.getenv("ORDER_SERVICE_URL", "http://order-service:8000")
 NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL", "http://notification-service:8000")
 

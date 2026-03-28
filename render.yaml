@@ -1,0 +1,282 @@
+# The Watcher - Render Blueprint
+# Deploy with: Connect repo to Render → New Blueprint Instance → Select this repo
+#
+# Architecture:
+#   Public:  gateway-service (API), visualizer-ui (Dashboard), jaeger (Tracing UI)
+#   Private: 9 microservices, visualizer-api, prometheus, loki
+#
+# Note: edge-remedy agent requires Kubernetes API access and cannot run on Render.
+#       Promtail requires Docker socket access and is excluded.
+
+services:
+  # ─── Observability Infrastructure ───────────────────────────────────────────
+
+  - type: pserv
+    name: jaeger
+    runtime: image
+    image:
+      url: docker.io/jaegertracing/all-in-one:latest
+    envVars:
+      - key: COLLECTOR_OTLP_ENABLED
+        value: "true"
+
+  - type: pserv
+    name: prometheus
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.prometheus
+    dockerContext: ./deploy/render
+    envVars:
+      - key: PORT
+        value: "9090"
+
+  - type: pserv
+    name: loki
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.loki
+    dockerContext: ./deploy/render
+    envVars:
+      - key: PORT
+        value: "3100"
+
+  # ─── Microservices (Private) ────────────────────────────────────────────────
+
+  - type: pserv
+    name: user-service
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.user-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://jaeger:4318
+      - key: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+      - key: OTEL_TRACES_EXPORTER
+        value: otlp
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: pserv
+    name: auth-service
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.auth-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://jaeger:4318
+      - key: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+      - key: OTEL_TRACES_EXPORTER
+        value: otlp
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: pserv
+    name: station-service
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.station-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://jaeger:4318
+      - key: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+      - key: OTEL_TRACES_EXPORTER
+        value: otlp
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: pserv
+    name: train-service
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.train-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://jaeger:4318
+      - key: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+      - key: OTEL_TRACES_EXPORTER
+        value: otlp
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: pserv
+    name: schedule-service
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.schedule-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://jaeger:4318
+      - key: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+      - key: OTEL_TRACES_EXPORTER
+        value: otlp
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: pserv
+    name: ticket-service
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.ticket-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://jaeger:4318
+      - key: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+      - key: OTEL_TRACES_EXPORTER
+        value: otlp
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: pserv
+    name: order-service
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.order-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://jaeger:4318
+      - key: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+      - key: OTEL_TRACES_EXPORTER
+        value: otlp
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: pserv
+    name: payment-service
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.payment-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://jaeger:4318
+      - key: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+      - key: OTEL_TRACES_EXPORTER
+        value: otlp
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: pserv
+    name: notification-service
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.notification-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://jaeger:4318
+      - key: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+      - key: OTEL_TRACES_EXPORTER
+        value: otlp
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  # ─── Gateway (Public) ──────────────────────────────────────────────────────
+
+  - type: web
+    name: gateway-service
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.gateway-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://jaeger:4318
+      - key: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+      - key: OTEL_TRACES_EXPORTER
+        value: otlp
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  # ─── Visualizer ────────────────────────────────────────────────────────────
+
+  - type: web
+    name: visualizer-api
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.visualizer-api
+    dockerContext: ./visualizer/api
+    envVars:
+      - key: PROMETHEUS_URL
+        value: http://prometheus:9090
+      - key: LOKI_URL
+        value: http://loki:3100
+      - key: JAEGER_URL
+        value: http://jaeger:16686
+      - key: GROQ_API_KEY
+        sync: false
+
+  - type: web
+    name: visualizer-ui
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile.visualizer-ui
+    dockerContext: ./visualizer/ui
+    buildFilter:
+      paths:
+        - visualizer/ui/**
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://visualizer-api.onrender.com

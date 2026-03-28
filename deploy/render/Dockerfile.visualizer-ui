@@ -21,4 +21,6 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
 EXPOSE 3000
+# Render requires listening on $PORT; Next.js standalone uses PORT env var
+ENV PORT=3000
 CMD ["node", "server.js"]

@@ -1,0 +1,235 @@
+## KEDA ScaledObjects — event-driven autoscaling for critical services
+## Replaces the standard HPA with KEDA's richer trigger ecosystem.
+##
+## Prerequisites:
+##   helm repo add kedacore https://kedacore.github.io/charts
+##   helm install keda kedacore/keda --namespace keda --create-namespace
+##
+## These ScaledObjects use Prometheus triggers (request rate, error rate,
+## queue depth) so scaling decisions are driven by real traffic signals
+## rather than raw CPU — yielding tighter, cheaper scaling curves.
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: prometheus-trigger-auth
+  namespace: train-ticket
+spec:
+  # No auth needed for in-cluster Prometheus
+  secretTargetRef: []
+---
+## ── Payment Service ──────────────────────────────────────────────────────
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: payment-service-scaledobject
+  namespace: train-ticket
+  labels:
+    app: payment-service
+spec:
+  scaleTargetRef:
+    name: payment-service
+  pollingInterval: 15          # Check triggers every 15s
+  cooldownPeriod: 120          # Wait 2m before scaling back down
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  fallback:
+    failureThreshold: 3        # After 3 failed polls, fall back to replicas below
+    replicas: 2
+  triggers:
+    # Scale on request rate — scales when RPS exceeds 50 per pod
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: sum(rate(http_request_duration_seconds_count{job="payment-service"}[2m]))
+        threshold: "50"
+        activationThreshold: "5"
+      authenticationRef:
+        name: prometheus-trigger-auth
+    # Scale on P95 latency — if latency exceeds 1.5s, add capacity
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="payment-service"}[2m])) by (le))
+        threshold: "1.5"
+        activationThreshold: "0.5"
+      authenticationRef:
+        name: prometheus-trigger-auth
+    # Scale on error rate — if 5xx rate exceeds 5/s, add capacity
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: sum(rate(http_requests_total{job="payment-service", status=~"5.."}[2m]))
+        threshold: "5"
+        activationThreshold: "1"
+      authenticationRef:
+        name: prometheus-trigger-auth
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 60
+          policies:
+            - type: Pods
+              value: 2
+              periodSeconds: 30
+        scaleDown:
+          stabilizationWindowSeconds: 180
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 60
+---
+## ── Ticket Service ───────────────────────────────────────────────────────
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: ticket-service-scaledobject
+  namespace: train-ticket
+  labels:
+    app: ticket-service
+spec:
+  scaleTargetRef:
+    name: ticket-service
+  pollingInterval: 15
+  cooldownPeriod: 120
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  fallback:
+    failureThreshold: 3
+    replicas: 2
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: sum(rate(http_request_duration_seconds_count{job="ticket-service"}[2m]))
+        threshold: "80"
+        activationThreshold: "10"
+      authenticationRef:
+        name: prometheus-trigger-auth
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="ticket-service"}[2m])) by (le))
+        threshold: "1.5"
+        activationThreshold: "0.5"
+      authenticationRef:
+        name: prometheus-trigger-auth
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 60
+          policies:
+            - type: Pods
+              value: 2
+              periodSeconds: 30
+        scaleDown:
+          stabilizationWindowSeconds: 180
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 60
+---
+## ── Order Service ────────────────────────────────────────────────────────
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: order-service-scaledobject
+  namespace: train-ticket
+  labels:
+    app: order-service
+spec:
+  scaleTargetRef:
+    name: order-service
+  pollingInterval: 15
+  cooldownPeriod: 120
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  fallback:
+    failureThreshold: 3
+    replicas: 2
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: sum(rate(http_request_duration_seconds_count{job="order-service"}[2m]))
+        threshold: "60"
+        activationThreshold: "5"
+      authenticationRef:
+        name: prometheus-trigger-auth
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="order-service"}[2m])) by (le))
+        threshold: "1.5"
+        activationThreshold: "0.5"
+      authenticationRef:
+        name: prometheus-trigger-auth
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: sum(rate(http_requests_total{job="order-service", status=~"5.."}[2m]))
+        threshold: "5"
+        activationThreshold: "1"
+      authenticationRef:
+        name: prometheus-trigger-auth
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 60
+          policies:
+            - type: Pods
+              value: 2
+              periodSeconds: 30
+        scaleDown:
+          stabilizationWindowSeconds: 180
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 60
+---
+## ── Gateway Service ──────────────────────────────────────────────────────
+## The gateway is the entry point — scale it on total inbound RPS
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: gateway-service-scaledobject
+  namespace: train-ticket
+  labels:
+    app: gateway-service
+spec:
+  scaleTargetRef:
+    name: gateway-service
+  pollingInterval: 15
+  cooldownPeriod: 120
+  minReplicaCount: 1
+  maxReplicaCount: 4
+  fallback:
+    failureThreshold: 3
+    replicas: 2
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-service:9090
+        query: sum(rate(http_request_duration_seconds_count{job="gateway-service"}[2m]))
+        threshold: "100"
+        activationThreshold: "10"
+      authenticationRef:
+        name: prometheus-trigger-auth
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 30
+          policies:
+            - type: Pods
+              value: 2
+              periodSeconds: 30
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 120

@@ -17,6 +17,10 @@ app.add_middleware(ChaosMiddleware)
 Instrumentator().instrument(app).expose(app)
 logger = setup_logger("auth-service")
 
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
 SECRET_KEY = "my_super_secret_key"
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "common", "user_config.json")
 

@@ -15,8 +15,7 @@ if (process.env.KUBERNETES_SERVICE_HOST) {
 } else {
   kc.loadFromDefault();
 }
-const appsApi = new k8s.AppsV1Api(kc);
-const coreApi = new k8s.CoreV1Api(kc);
+const appsApi = kc.makeApiClient(k8s.AppsV1Api);
 
 function isOnCooldown(service, action) {
   const key = `${service}:${action}`;
@@ -53,7 +52,8 @@ async function restartDeployment(service) {
     };
 
     await appsApi.patchNamespacedDeployment(
-      { name: service, namespace: NAMESPACE, body: patch },
+      service, NAMESPACE, patch,
+      undefined, undefined, undefined, undefined,
       { headers: { 'Content-Type': 'application/strategic-merge-patch+json' } }
     );
 
@@ -75,7 +75,7 @@ async function scaleUp(service) {
   if (isOnCooldown(service, 'scale')) return false;
 
   try {
-    const deployment = await appsApi.readNamespacedDeployment({ name: service, namespace: NAMESPACE });
+    const { body: deployment } = await appsApi.readNamespacedDeployment(service, NAMESPACE);
     const current = deployment.spec.replicas || 1;
 
     if (current >= MAX_REPLICAS) {
@@ -87,7 +87,8 @@ async function scaleUp(service) {
     const patch = { spec: { replicas: target } };
 
     await appsApi.patchNamespacedDeployment(
-      { name: service, namespace: NAMESPACE, body: patch },
+      service, NAMESPACE, patch,
+      undefined, undefined, undefined, undefined,
       { headers: { 'Content-Type': 'application/strategic-merge-patch+json' } }
     );
 
@@ -98,6 +99,44 @@ async function scaleUp(service) {
   } catch (err) {
     console.error(`[REMEDIATE] Failed to scale ${service}:`, err.body?.message || err.message);
     await publishRemediationEvent(service, 'scale', false);
+    return false;
+  }
+}
+
+/**
+ * Proactively scale a deployment based on predictive forecast.
+ * Unlike reactive scaleUp, this uses a dedicated cooldown key ('preScale')
+ * and logs the forecasted reason for audit trails.
+ */
+export async function preScale(service, reason) {
+  if (isOnCooldown(service, 'preScale')) return false;
+
+  try {
+    const { body: deployment } = await appsApi.readNamespacedDeployment(service, NAMESPACE);
+    const current = deployment.spec.replicas || 1;
+
+    if (current >= MAX_REPLICAS) {
+      console.log(`[PRE-SCALE] ${service} already at max replicas (${MAX_REPLICAS}), skipping.`);
+      return false;
+    }
+
+    const target = current + 1;
+    const patch = { spec: { replicas: target } };
+
+    await appsApi.patchNamespacedDeployment(
+      service, NAMESPACE, patch,
+      undefined, undefined, undefined, undefined,
+      { headers: { 'Content-Type': 'application/strategic-merge-patch+json' } }
+    );
+
+    setCooldown(service, 'preScale');
+    console.log(`[PRE-SCALE] Proactively scaled ${service} from ${current} to ${target} replicas`);
+    console.log(`[PRE-SCALE] Reason: ${reason}`);
+    await publishRemediationEvent(service, `preScale:${current}->${target}`, true);
+    return true;
+  } catch (err) {
+    console.error(`[PRE-SCALE] Failed to pre-scale ${service}:`, err.body?.message || err.message);
+    await publishRemediationEvent(service, 'preScale', false);
     return false;
   }
 }
