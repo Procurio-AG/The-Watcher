@@ -1,9 +1,6 @@
-import os
 import httpx
 from typing import Any
-
-LOKI_URL = os.getenv("LOKI_URL", "http://loki:3100")
-
+from services.backend_targets import LOKI_CANDIDATES
 
 async def query_logs(query: str, limit: int = 50, start: str = "", end: str = "") -> Any:
     params: dict[str, Any] = {"query": query, "limit": limit}
@@ -12,11 +9,18 @@ async def query_logs(query: str, limit: int = 50, start: str = "", end: str = ""
     if end:
         params["end"] = end
 
+    last_error = None
     async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            f"{LOKI_URL}/loki/api/v1/query_range",
-            params=params,
-            timeout=10.0,
-        )
-        resp.raise_for_status()
-        return resp.json()["data"]["result"]
+        for base_url in LOKI_CANDIDATES:
+            try:
+                resp = await client.get(
+                    f"{base_url}/loki/api/v1/query_range",
+                    params=params,
+                    timeout=5.0,
+                )
+                resp.raise_for_status()
+                return resp.json()["data"]["result"]
+            except Exception as exc:
+                last_error = exc
+                continue
+    raise last_error or RuntimeError("Loki query failed")

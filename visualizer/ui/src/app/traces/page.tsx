@@ -45,7 +45,7 @@ export default function TracesPage() {
       <div className="dashboard-card min-h-0 flex-1 overflow-hidden p-2">
         <table className="h-full w-full table-fixed">
           <thead>
-            <tr className="border-b border-[#efede8] text-left text-[11px] uppercase tracking-[0.12em] text-[#9a9a9a]">
+            <tr className="border-b border-white/30 text-left text-[11px] uppercase tracking-[0.12em] text-[#9a9a9a]">
               <th className="px-4 py-4 font-semibold">Trace ID</th>
               <th className="px-4 py-4 font-semibold">Operation</th>
               <th className="px-4 py-4 text-right font-semibold">Duration</th>
@@ -56,8 +56,8 @@ export default function TracesPage() {
           </thead>
           <tbody>
             {(traces || []).slice(0, 10).map((trace: any) => (
-              <tr key={trace.traceID} className="border-b border-[#f2efea] text-[13px] last:border-b-0">
-                <td className="truncate px-4 py-4 font-mono font-semibold text-[#5f86d9]">{trace.traceID}</td>
+              <tr key={trace.traceID} className="border-b border-white/20 text-[13px] last:border-b-0">
+                <td className="truncate px-4 py-4 font-mono font-semibold text-[#7201FF]">{trace.traceID}</td>
                 <td className="px-4 py-4 font-semibold text-[#343434]">{trace.operation}</td>
                 <td className="px-4 py-4 text-right font-semibold text-[#4d4d4d]">{trace.duration_ms}ms</td>
                 <td className="px-4 py-4 text-right font-semibold text-[#4d4d4d]">{trace.spans_count}</td>
