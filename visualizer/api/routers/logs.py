@@ -21,7 +21,7 @@ async def get_logs(
     if label_selectors:
         query = '{' + ','.join(label_selectors) + '}'
     else:
-        query = '{job="containers"}'
+        query = '{service_name=~".+"}'
 
     try:
         result = await query_logs(query, limit=limit)

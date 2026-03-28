@@ -1,10 +1,11 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, Search, Bell, User } from "lucide-react";
+import { ActivitySquare } from "lucide-react";
 
 const tabs = [
-  { label: "Home", href: "/" },
+  { label: "System", href: "/" },
   { label: "Services", href: "/services" },
   { label: "Logs", href: "/logs" },
   { label: "Traces", href: "/traces" },
@@ -14,50 +15,37 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="bg-white/80 backdrop-blur-xl border-b border-surface-200 sticky top-0 z-50">
-      <div className="max-w-[1440px] mx-auto px-8 flex items-center justify-between h-[64px]">
-        {/* Left: Logo + Nav */}
-        <div className="flex items-center gap-10">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-sm">
-              <Activity className="w-4 h-4 text-white" />
+    <nav className="flex h-[84px] items-center border-b border-surface-200 px-6">
+      <div className="flex items-center gap-12">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 via-orange-400 to-orange-500 shadow-[0_8px_18px_rgba(242,163,79,0.28)]">
+            <div className="flex h-5 w-5 items-center justify-center rounded-md border border-white/70 bg-white/20">
+              <ActivitySquare className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="font-bold text-[17px] text-gray-900 tracking-tight">The Watcher</span>
-          </Link>
-
-          <div className="flex items-center gap-0.5">
-            {tabs.map((tab) => {
-              const isActive =
-                tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
-              return (
-                <Link
-                  key={tab.href}
-                  href={tab.href}
-                  className={`px-4 py-[7px] rounded-full text-[13px] font-medium transition-all duration-150 ${
-                    isActive
-                      ? "bg-gray-900 text-white shadow-pill"
-                      : "text-gray-500 hover:text-gray-900 hover:bg-surface-100"
-                  }`}
-                >
-                  {tab.label}
-                </Link>
-              );
-            })}
           </div>
-        </div>
+          <span className="text-[15px] font-semibold tracking-[-0.04em] text-slate-900">
+            The Watcher
+          </span>
+        </Link>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-3">
-          <button className="w-9 h-9 flex items-center justify-center hover:bg-surface-100 rounded-full transition-colors">
-            <Search className="w-[18px] h-[18px] text-gray-500" />
-          </button>
-          <button className="w-9 h-9 flex items-center justify-center hover:bg-surface-100 rounded-full transition-colors relative">
-            <Bell className="w-[18px] h-[18px] text-gray-500" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-          </button>
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-300 to-orange-400 ring-2 ring-white shadow-sm cursor-pointer overflow-hidden flex items-center justify-center">
-            <User className="w-4 h-4 text-white" />
-          </div>
+        <div className="flex items-center gap-1">
+          {tabs.map((tab) => {
+            const isActive =
+              tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={`rounded-2xl px-4 py-2.5 text-[12px] font-medium tracking-[-0.02em] transition-all ${
+                  isActive
+                    ? "bg-[#2d2d30] text-white shadow-[0_10px_24px_rgba(35,35,38,0.22)]"
+                    : "text-[#4e4d4a] hover:bg-[#f1efea]"
+                }`}
+              >
+                {tab.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </nav>

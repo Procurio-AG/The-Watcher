@@ -2,9 +2,17 @@
 import useSWR from "swr";
 import { apiFetch } from "@/lib/api";
 
-export function useTraces(service = "gateway-service", limit = 20) {
+export type TraceLookback = "1h" | "6h" | "24h";
+
+export function useTraceServices() {
+  return useSWR("/api/traces/services", (path: string) => apiFetch<string[]>(path), {
+    refreshInterval: 30000,
+  });
+}
+
+export function useTraces(service = "gateway-service", limit = 20, lookback: TraceLookback = "1h") {
   return useSWR(
-    `/api/traces?service=${service}&limit=${limit}`,
+    `/api/traces?service=${service}&limit=${limit}&lookback=${lookback}`,
     (path: string) => apiFetch<any[]>(path),
     { refreshInterval: 10000 }
   );

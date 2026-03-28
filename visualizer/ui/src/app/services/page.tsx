@@ -1,4 +1,5 @@
 "use client";
+
 import useSWR from "swr";
 import { apiFetch } from "@/lib/api";
 import PageHeader from "@/components/layout/PageHeader";
@@ -10,34 +11,34 @@ export default function ServicesPage() {
   });
 
   return (
-    <div>
-      <PageHeader title="Services" showDateRange={false} />
-      <div className="bg-white rounded-3xl border border-surface-200 shadow-card overflow-hidden">
+    <div className="flex h-full flex-col">
+      <PageHeader title="Services" showControls={false} />
+      <div className="mock-panel flex-1 overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-surface-200">
-              <th className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">
+            <tr className="border-b border-surface-200 bg-[#faf9f6]">
+              <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
                 Service
               </th>
-              <th className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">
+              <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
                 Status
               </th>
-              <th className="text-right text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">
+              <th className="px-6 py-4 text-right text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
                 P95 Latency
               </th>
-              <th className="text-right text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">
+              <th className="px-6 py-4 text-right text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
                 Error Rate
               </th>
-              <th className="text-right text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">
+              <th className="px-6 py-4 text-right text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
                 Requests/s
               </th>
             </tr>
           </thead>
           <tbody>
-            {(services || []).map((svc: any) => (
+            {(services || []).slice(0, 9).map((svc: any) => (
               <tr
                 key={svc.name}
-                className="border-b border-surface-200 last:border-0 hover:bg-surface-50 transition-colors cursor-pointer"
+                className="cursor-pointer border-b border-surface-200 last:border-0 hover:bg-surface-50 transition-colors"
               >
                 <td className="px-6 py-4">
                   <span className="text-[13px] font-semibold text-gray-900">{svc.name}</span>
@@ -65,7 +66,7 @@ export default function ServicesPage() {
           </tbody>
         </table>
         {(!services || services.length === 0) && (
-          <div className="py-16 text-center text-gray-400 text-[13px]">Loading services...</div>
+          <div className="py-16 text-center text-[13px] text-gray-400">Loading services...</div>
         )}
       </div>
     </div>

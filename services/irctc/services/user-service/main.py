@@ -17,7 +17,7 @@ app.add_middleware(ChaosMiddleware)
 Instrumentator().instrument(app).expose(app)
 logger = setup_logger("user-service")
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "common", "user_config.json")
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "common", "user_config.json")
 
 def load_users():
     with open(CONFIG_PATH, "r") as f:

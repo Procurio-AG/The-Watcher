@@ -1,78 +1,60 @@
 "use client";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
-import { useRequestSeries } from "@/hooks/useMetrics";
-import { format } from "date-fns";
-import { MoreHorizontal } from "lucide-react";
 
-export default function RequestVolume() {
-  const { data } = useRequestSeries("15m");
+import { useRequestSeries, type MetricsRange } from "@/hooks/useMetrics";
+
+export default function RequestVolume({ range }: { range: MetricsRange }) {
+  const { data } = useRequestSeries(range);
 
   const timeMap = new Map<number, number>();
   (data || []).forEach((series: any) => {
-    (series.values || []).forEach((p: any) => {
-      const ts = Math.round(p.timestamp) * 1000;
-      timeMap.set(ts, (timeMap.get(ts) || 0) + p.value);
+    (series.values || []).forEach((point: any) => {
+      const ts = point.timestamp * 1000;
+      timeMap.set(ts, (timeMap.get(ts) || 0) + point.value);
     });
   });
 
   const chartData = Array.from(timeMap.entries())
-    .map(([time, rps]) => ({ time, rps: Math.round(rps) }))
+    .map(([time, value]) => ({ time, value: Math.round(value) }))
     .sort((a, b) => a.time - b.time);
 
-  const totalRps = chartData.length > 0
-    ? Math.round(chartData.reduce((s, d) => s + d.rps, 0) / chartData.length)
-    : 0;
-
-  const maxRps = Math.max(...chartData.map((d) => d.rps), 1);
+  const latest = chartData[chartData.length - 1]?.value || 0;
+  const previous = chartData[Math.max(chartData.length - 4, 0)]?.value || 0;
+  const delta = latest - previous;
+  const maxValue = Math.max(...chartData.map((item) => item.value), 1);
 
   return (
-    <div className="bg-white rounded-3xl p-4 border border-surface-200 shadow-card card-hover h-full flex flex-col">
-      <div className="flex items-center justify-between mb-1">
-        <h3 className="text-[15px] font-semibold text-gray-900">Request Volume</h3>
-        <button className="w-8 h-8 rounded-full hover:bg-surface-100 flex items-center justify-center transition-colors">
-          <MoreHorizontal className="w-4 h-4 text-gray-400" />
-        </button>
-      </div>
-      <div className="flex items-end gap-3 mb-4">
-        <span className="text-stat-sm text-gray-900">{totalRps}</span>
-        <span className="text-[12px] text-gray-400 font-medium pb-0.5">req/s avg</span>
+    <div className="mock-panel card-hover flex h-full flex-col p-4">
+      <div className="mb-3">
+        <h3 className="text-[15px] font-semibold tracking-[-0.03em] text-slate-900">
+          Request Volume
+        </h3>
       </div>
 
-      <div className="flex-1 min-h-0">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 0, right: 0, bottom: 0, left: -10 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0eeeb" vertical={false} />
-            <XAxis
-              dataKey="time"
-              tickFormatter={(t) => format(new Date(t), "HH:mm")}
-              stroke="#d4d1cc"
-              fontSize={11}
-              tickLine={false}
-              axisLine={false}
+      <div className="mb-3 flex items-end justify-between gap-3">
+        <div>
+          <p className="text-[34px] font-semibold leading-none tracking-[-0.05em] text-[#202022]">
+            {latest}
+          </p>
+          <p className="mt-1 text-[12px] text-[#9a948d]">requests/sec</p>
+        </div>
+        <div className="text-right">
+          <p className={`text-[24px] font-semibold tracking-[-0.05em] ${delta >= 0 ? "text-[#4f9f64]" : "text-[#d66f76]"}`}>
+            {delta >= 0 ? "+" : ""}
+            {delta}
+          </p>
+          <p className="text-[11px] text-[#a39d96]">vs prior sample</p>
+        </div>
+      </div>
+
+      <div className="mt-auto flex h-[96px] items-end gap-2 rounded-[18px] bg-[#f9fbff] px-2.5 pb-2.5 pt-4">
+        {chartData.slice(-12).map((item, index) => (
+          <div key={`${item.time}-${index}`} className="flex flex-1 items-end">
+            <div
+              className="w-full rounded-full bg-gradient-to-t from-[#6a9ff7] to-[#bed0ff]"
+              style={{ height: `${Math.max((item.value / maxValue) * 72, 10)}px` }}
             />
-            <YAxis stroke="#d4d1cc" fontSize={11} tickLine={false} axisLine={false} />
-            <Tooltip
-              labelFormatter={(t) => format(new Date(t), "HH:mm:ss")}
-              contentStyle={{ borderRadius: "14px", border: "1px solid #ece9e4", boxShadow: "0 8px 30px rgba(0,0,0,0.08)", padding: "10px 14px", fontSize: "12px" }}
-            />
-            <Bar dataKey="rps" radius={[6, 6, 2, 2]} maxBarSize={16}>
-              {chartData.map((entry, idx) => {
-                const ratio = entry.rps / maxRps;
-                const color = ratio > 0.8 ? "#6366f1" : ratio > 0.5 ? "#818cf8" : "#c7d2fe";
-                return <Cell key={idx} fill={color} />;
-              })}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -2,7 +2,11 @@ version: "3.8"
 
 x-service-common: &service-common
   environment:
-    - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318/v1/traces
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+    - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+    - OTEL_TRACES_EXPORTER=otlp
+    - OTEL_METRICS_EXPORTER=none
+    - OTEL_LOGS_EXPORTER=none
     - CHAOS_LATENCY_MAX_MS=0
     - CHAOS_ERROR_RATE=0.0
   networks:
@@ -148,7 +152,7 @@ services:
     build:
       context: ../../visualizer/api
     ports:
-      - "8081:8080"
+      - "8080:8080"
     environment:
       - PROMETHEUS_URL=http://prometheus:9090
       - LOKI_URL=http://loki:3100

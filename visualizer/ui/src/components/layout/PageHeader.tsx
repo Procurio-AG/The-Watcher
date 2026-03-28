@@ -1,52 +1,80 @@
 "use client";
-import { AlertTriangle, CheckCircle, AlertCircle, Link as LinkIcon, Calendar, Plus } from "lucide-react";
+
+import { useState, type ElementType } from "react";
+import { AlertCircle, AlertTriangle, CheckCircle2, ChevronDown } from "lucide-react";
+import type { MetricsRange } from "@/hooks/useMetrics";
 
 interface PageHeaderProps {
   title: string;
+  showControls?: boolean;
+  range?: MetricsRange;
+  onRangeChange?: (range: MetricsRange) => void;
   systemState?: string;
-  showDateRange?: boolean;
 }
 
-const stateConfig: Record<string, { icon: React.ElementType; color: string }> = {
-  healthy: { icon: CheckCircle, color: "text-green-500" },
-  degraded: { icon: AlertCircle, color: "text-amber-500" },
-  critical: { icon: AlertTriangle, color: "text-red-500" },
+const RANGE_OPTIONS: Array<{ value: MetricsRange; label: string }> = [
+  { value: "15m", label: "Last 15 min" },
+  { value: "1h", label: "Last 1 hour" },
+  { value: "6h", label: "Last 6 hours" },
+];
+
+const STATE_ICON: Record<string, ElementType> = {
+  healthy: CheckCircle2,
+  degraded: AlertCircle,
+  critical: AlertTriangle,
 };
 
-export default function PageHeader({ title, systemState = "healthy", showDateRange = true }: PageHeaderProps) {
-  const config = stateConfig[systemState] || stateConfig.healthy;
-  const Icon = config.icon;
+const STATE_COLOR: Record<string, string> = {
+  healthy: "text-[#57ba77]",
+  degraded: "text-[#d8b542]",
+  critical: "text-[#d46d74]",
+};
+
+export default function PageHeader({
+  title,
+  showControls = true,
+  range = "15m",
+  onRangeChange,
+  systemState,
+}: PageHeaderProps) {
+  const [internalRange, setInternalRange] = useState<MetricsRange>(range);
+  const selectedRange = onRangeChange ? range : internalRange;
+  const Icon = systemState ? STATE_ICON[systemState] : null;
+  const iconColor = systemState ? STATE_COLOR[systemState] : "";
+
+  const handleRangeChange = (value: MetricsRange) => {
+    if (onRangeChange) {
+      onRangeChange(value);
+      return;
+    }
+    setInternalRange(value);
+  };
 
   return (
-    <div className="flex items-end justify-between mb-3">
+    <div className="mb-4 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        {systemState !== "healthy" && <Icon className={`w-8 h-8 ${config.color}`} />}
-        <h1 className="text-display text-gray-900">{title}</h1>
-        <button className="w-8 h-8 rounded-full bg-surface-100 hover:bg-surface-200 flex items-center justify-center transition-colors mt-1">
-          <LinkIcon className="w-4 h-4 text-gray-400" />
-        </button>
+        {Icon ? <Icon className={`h-9 w-9 ${iconColor}`} /> : null}
+        <h1 className="text-display text-[#202022]">{title}</h1>
       </div>
 
-      {showDateRange && (
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-surface-200 rounded-xl text-sm text-gray-700 hover:border-surface-300 transition-colors shadow-pill">
-            <Calendar className="w-3.5 h-3.5 text-gray-400" />
-            <span className="font-medium">Last 15 min</span>
-          </button>
-          <span className="text-xs text-gray-400 font-medium">compared to</span>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-surface-200 rounded-xl text-sm text-gray-700 hover:border-surface-300 transition-colors shadow-pill">
-            <Calendar className="w-3.5 h-3.5 text-gray-400" />
-            <span className="font-medium">Previous 15 min</span>
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-surface-200 rounded-xl text-sm text-gray-700 hover:border-surface-300 transition-colors shadow-pill">
-            <span className="font-medium">Auto</span>
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-surface-200 rounded-xl text-sm text-gray-700 hover:border-surface-300 transition-colors shadow-pill">
-            <span className="font-medium">Add widget</span>
-            <Plus className="w-3.5 h-3.5" />
-          </button>
+      {showControls ? (
+        <div className="flex items-center gap-2.5">
+          <label className="mock-pill flex h-11 items-center gap-2 px-4 text-[13px] text-slate-700">
+            <select
+              value={selectedRange}
+              onChange={(event) => handleRangeChange(event.target.value as MetricsRange)}
+              className="bg-transparent pr-4 outline-none"
+            >
+              {RANGE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="h-3.5 w-3.5 text-[#8d8881]" />
+          </label>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

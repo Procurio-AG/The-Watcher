@@ -5,19 +5,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --bg-main: #f7f6f3;
+  --bg-main: #cfccca;
+  --surface: #f7f6f3;
   --card-bg: #ffffff;
   --card-border: #ece9e4;
-  --text-primary: #1a1a1a;
-  --text-secondary: #6b6b6b;
-  --text-muted: #a3a3a3;
-  --accent-blue: #3b82f6;
-  --accent-green: #22c55e;
-  --accent-red: #ef4444;
-  --accent-amber: #f59e0b;
+  --card-border-strong: #ddd7cf;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6d6b67;
+  --text-muted: #9e9b95;
+  --pill-bg: #f7f5f2;
+  --accent-blue: #4f8df5;
+  --accent-blue-dark: #3d7df0;
+  --accent-green: #57ba77;
+  --accent-red: #ec77a7;
+  --accent-amber: #e7d166;
+  --accent-orange: #f3a36f;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
 }
 
 * {
+  box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -28,61 +40,116 @@ body {
   color: var(--text-primary);
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #d4d1cc;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #b8b4ae;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-/* Striped progress bar patterns */
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+#__next {
+  height: 100%;
+}
+
 .progress-stripe-green {
   background: repeating-linear-gradient(
     -55deg,
-    #22c55e,
-    #22c55e 3px,
-    #16a34a 3px,
-    #16a34a 6px
+    #58c17a,
+    #58c17a 3px,
+    #3ea862 3px,
+    #3ea862 6px
   );
 }
+
 .progress-stripe-blue {
   background: repeating-linear-gradient(
     -55deg,
-    #60a5fa,
-    #60a5fa 3px,
-    #3b82f6 3px,
-    #3b82f6 6px
+    #73b5ff,
+    #73b5ff 3px,
+    #4e93f5 3px,
+    #4e93f5 6px
   );
 }
+
 .progress-stripe-red {
   background: repeating-linear-gradient(
     -55deg,
-    #f87171,
-    #f87171 3px,
-    #ef4444 3px,
-    #ef4444 6px
+    #f39298,
+    #f39298 3px,
+    #dd7078 3px,
+    #dd7078 6px
   );
 }
 
-/* Gradient insight card */
-.insight-gradient {
-  background: linear-gradient(135deg, #fbbf24 0%, #f97316 30%, #ec4899 70%, #8b5cf6 100%);
+.mock-panel {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(236, 233, 228, 0.96);
+  border-radius: 26px;
+  box-shadow: 0 14px 32px rgba(120, 112, 100, 0.07);
 }
 
-/* Soft card hover */
-.card-hover {
-  transition: box-shadow 0.2s ease, transform 0.15s ease;
+.mock-pill {
+  background: var(--pill-bg);
+  border: 1px solid rgba(223, 218, 209, 0.95);
+  border-radius: 15px;
+  box-shadow: 0 1px 2px rgba(48, 43, 34, 0.03);
 }
+
+.ai-analysis-gradient {
+  background:
+    radial-gradient(circle at 84% 10%, rgba(255, 176, 115, 0.6), transparent 24%),
+    radial-gradient(circle at 65% 95%, rgba(114, 170, 255, 0.38), transparent 27%),
+    linear-gradient(135deg, #f6f7fb 0%, #f6efe3 44%, #f7dfbf 72%, #f1c6a3 100%);
+}
+
+.ai-analysis-overlay {
+  background:
+    linear-gradient(142deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.18) 100%),
+    radial-gradient(circle at 100% 0%, rgba(255, 187, 123, 0.85), transparent 36%);
+}
+
+.insight-gradient {
+  background:
+    radial-gradient(circle at 85% 0%, rgba(255, 186, 116, 0.9), transparent 28%),
+    radial-gradient(circle at 10% 100%, rgba(98, 154, 240, 0.76), transparent 24%),
+    linear-gradient(135deg, #edf0fb 0%, #f6ebda 42%, #f2b17c 72%, #f9e2b7 100%);
+}
+
+.glass-sheen {
+  background: linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.18));
+}
+
+.card-hover {
+  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+
 .card-hover:hover {
-  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  border-color: rgba(217, 210, 200, 0.9);
+  box-shadow: 0 20px 40px rgba(120, 112, 100, 0.11);
   transform: translateY(-1px);
+}
+
+.chart-grid line {
+  stroke: #ebe8f1;
+}
+
+.chart-grid path {
+  stroke: #ebe8f1;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }

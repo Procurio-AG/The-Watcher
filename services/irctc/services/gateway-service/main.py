@@ -36,6 +36,8 @@ async def proxy(service_prefix: str, request: Request, path: str = ""):
     upstream_url = f"http://{SERVICE_MAPPING[service_prefix]}:8000/{service_prefix}"
     if path:
         upstream_url += f"/{path}"
+    if request.url.query:
+        upstream_url += f"?{request.url.query}"
         
     logger.info(f"Proxying request to {upstream_url}")
     

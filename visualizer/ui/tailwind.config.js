@@ -5,41 +5,35 @@ module.exports = {
     extend: {
       colors: {
         surface: {
-          50: "#faf9f7",
-          100: "#f7f6f3",
-          200: "#ece9e4",
-          300: "#d6d3cd",
+          50: "#fbfaf8",
+          100: "#f7f5f2",
+          200: "#ebe8e2",
+          300: "#d7d2ca",
         },
         severity: {
-          healthy: "#22c55e",
-          degraded: "#f59e0b",
-          critical: "#ef4444",
+          healthy: "#57ba77",
+          degraded: "#dfbf55",
+          critical: "#da6a71",
         },
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
       },
       fontSize: {
-        "display": ["3rem", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }],
-        "display-sm": ["2rem", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "700" }],
-        "stat": ["2.25rem", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }],
-        "stat-sm": ["1.5rem", { lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600" }],
+        "display": ["3rem", { lineHeight: "1.02", letterSpacing: "-0.045em", fontWeight: "600" }],
+        "display-sm": ["2rem", { lineHeight: "1.06", letterSpacing: "-0.035em", fontWeight: "600" }],
+        "stat": ["2.35rem", { lineHeight: "1.02", letterSpacing: "-0.045em", fontWeight: "600" }],
+        "stat-sm": ["1.65rem", { lineHeight: "1.06", letterSpacing: "-0.03em", fontWeight: "600" }],
       },
       boxShadow: {
-        "card": "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)",
-        "card-hover": "0 8px 30px rgba(0,0,0,0.06)",
-        "pill": "0 1px 2px rgba(0,0,0,0.05)",
+        "card": "0 16px 34px rgba(120,112,100,0.08)",
+        "card-hover": "0 20px 40px rgba(120,112,100,0.11)",
+        "pill": "0 1px 2px rgba(0,0,0,0.04)",
       },
       borderRadius: {
-        "2xl": "16px",
-        "3xl": "20px",
-        "4xl": "24px",
-      },
-      gridTemplateColumns: {
-        "dashboard": "5fr 3fr 4fr",
-      },
-      gridTemplateRows: {
-        "dashboard": "1fr auto 0.7fr",
+        "2xl": "18px",
+        "3xl": "24px",
+        "4xl": "28px",
       },
     },
   },

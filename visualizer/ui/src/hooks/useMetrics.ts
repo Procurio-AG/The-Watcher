@@ -4,6 +4,8 @@ import { apiFetch } from "@/lib/api";
 
 const fetcher = <T>(path: string) => apiFetch<T>(path);
 
+export type MetricsRange = "15m" | "1h" | "6h";
+
 export interface OverviewData {
   system_state: string;
   error_rate: number;
@@ -34,15 +36,14 @@ export function useOverview() {
   return useSWR<OverviewData>("/api/metrics/overview", fetcher, { refreshInterval: 5000 });
 }
 
-export function useLatencySeries(range = "15m") {
+export function useLatencySeries(range: MetricsRange = "15m") {
   return useSWR<LatencySeriesData>(`/api/metrics/latency?range=${range}`, fetcher, { refreshInterval: 10000 });
 }
 
-export function useErrorSeries(range = "15m") {
+export function useErrorSeries(range: MetricsRange = "15m") {
   return useSWR<ServiceSeries[]>(`/api/metrics/errors?range=${range}`, fetcher, { refreshInterval: 10000 });
 }
 
-export function useRequestSeries(range = "15m") {
+export function useRequestSeries(range: MetricsRange = "15m") {
   return useSWR<ServiceSeries[]>(`/api/metrics/requests?range=${range}`, fetcher, { refreshInterval: 10000 });
 }
-
