@@ -53,7 +53,7 @@ htmlcov/
 *.h5
 *.pt
 *.pth
-*.onnx
+#*.onnx
 *.joblib
 *.pkl
 
@@ -117,7 +117,7 @@ px-data/
 # =========================
 # k6 Load Testing
 # =========================
-*.json
+#*.json
 !visualizer/ui/package.json
 !visualizer/ui/package-lock.json
 !visualizer/ui/tsconfig.json
