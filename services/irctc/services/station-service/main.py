@@ -16,6 +16,10 @@ app.add_middleware(ChaosMiddleware)
 Instrumentator().instrument(app).expose(app)
 logger = setup_logger("station-service")
 
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
 class Station(BaseModel):
     id: str
     name: str

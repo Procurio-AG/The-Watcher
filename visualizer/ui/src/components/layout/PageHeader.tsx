@@ -6,6 +6,7 @@ import type { MetricsRange } from "@/hooks/useMetrics";
 
 interface PageHeaderProps {
   title: string;
+  subtitle?: string;
   showControls?: boolean;
   range?: MetricsRange;
   onRangeChange?: (range: MetricsRange) => void;
@@ -24,14 +25,15 @@ const STATE_ICON: Record<string, ElementType> = {
   critical: AlertTriangle,
 };
 
-const STATE_COLOR: Record<string, string> = {
-  healthy: "text-[#57ba77]",
-  degraded: "text-[#d8b542]",
-  critical: "text-[#d46d74]",
+const STATE_ICON_COLOR: Record<string, string> = {
+  healthy: "text-[#8FFE01]",
+  degraded: "text-[#f59e0b]",
+  critical: "text-[#ef4444]",
 };
 
 export default function PageHeader({
   title,
+  subtitle,
   showControls = true,
   range = "15m",
   onRangeChange,
@@ -40,7 +42,6 @@ export default function PageHeader({
   const [internalRange, setInternalRange] = useState<MetricsRange>(range);
   const selectedRange = onRangeChange ? range : internalRange;
   const Icon = systemState ? STATE_ICON[systemState] : null;
-  const iconColor = systemState ? STATE_COLOR[systemState] : "";
 
   const handleRangeChange = (value: MetricsRange) => {
     if (onRangeChange) {
@@ -51,29 +52,31 @@ export default function PageHeader({
   };
 
   return (
-    <div className="mb-4 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        {Icon ? <Icon className={`h-9 w-9 ${iconColor}`} /> : null}
-        <h1 className="text-display text-[#202022]">{title}</h1>
+    <div className="flex items-start justify-between gap-4 pb-5">
+      <div className="min-w-0">
+        <div className="flex items-center gap-3">
+          {Icon ? <Icon className={`h-7 w-7 ${STATE_ICON_COLOR[systemState || "healthy"]}`} strokeWidth={2} /> : null}
+          <h1 className="text-[30px] font-bold tracking-[-0.05em] text-[#1a1a1a]">{title}</h1>
+        </div>
+        {subtitle ? <p className="mt-1.5 text-[13px] text-[#999]">{subtitle}</p> : null}
       </div>
 
       {showControls ? (
-        <div className="flex items-center gap-2.5">
-          <label className="mock-pill flex h-11 items-center gap-2 px-4 text-[13px] text-slate-700">
-            <select
-              value={selectedRange}
-              onChange={(event) => handleRangeChange(event.target.value as MetricsRange)}
-              className="bg-transparent pr-4 outline-none"
-            >
-              {RANGE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="h-3.5 w-3.5 text-[#8d8881]" />
-          </label>
-        </div>
+        <label className="glass-pill shrink-0 pr-3">
+          <span className="text-[#999]">Range</span>
+          <select
+            value={selectedRange}
+            onChange={(e) => handleRangeChange(e.target.value as MetricsRange)}
+            className="bg-transparent px-1 py-0 pr-5 text-[13px] font-bold text-[#333] outline-none"
+          >
+            {RANGE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="h-4 w-4 text-[#999]" />
+        </label>
       ) : null}
     </div>
   );

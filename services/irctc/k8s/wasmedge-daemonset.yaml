@@ -17,9 +17,8 @@ spec:
       serviceAccountName: edge-remediation
       containers:
       - name: edge-poller
-        image: node:20-slim
-        workingDir: /app
-        command: ["node", "poller.js"]
+        image: edge-remedy:latest
+        imagePullPolicy: Never
         volumeMounts:
         - name: sla-config
           mountPath: /etc/config/sla_config.json
@@ -43,7 +42,23 @@ spec:
         - name: REMEDIATION_ENABLED
           value: "true"
         - name: REMEDIATION_COOLDOWN_MS
+          value: "120000"
+        - name: PREDICTIVE_SCALING_ENABLED
+          value: "true"
+        - name: FORECAST_INTERVAL_MS
           value: "60000"
+        - name: FORECAST_HORIZON_MINUTES
+          value: "10"
+        - name: FORECAST_HISTORY_HOURS
+          value: "24"
+        - name: CPU_FORECAST_THRESHOLD
+          value: "70"
+        - name: RPS_FORECAST_SPIKE_RATIO
+          value: "2.0"
+        - name: FORECAST_SEASONAL_PERIOD
+          value: "12"
+        - name: MAX_REPLICAS
+          value: "5"
         resources:
           requests:
             cpu: 50m
