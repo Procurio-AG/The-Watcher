@@ -47,6 +47,7 @@ ENV/
 .coverage.*
 htmlcov/
 .pytest_cache/
+*.claude/
 
 # Jupyter / ML artifacts
 .ipynb_checkpoints/
