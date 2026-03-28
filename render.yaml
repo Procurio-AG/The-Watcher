@@ -225,7 +225,7 @@ services:
     dockerfilePath: ./deploy/render/Dockerfile.visualizer-api
     dockerContext: ./visualizer/api
     envVars:
-      - key: GROQ_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
 
   - type: web

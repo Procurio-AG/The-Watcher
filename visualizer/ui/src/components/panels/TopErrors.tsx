@@ -11,7 +11,7 @@ interface ServiceData {
 }
 
 export default function TopErrors() {
-  const { data: services } = useSWR("/api/services", (path: string) => apiFetch<ServiceData[]>(path), {
+  const { data: services, isLoading } = useSWR("/api/services", (path: string) => apiFetch<ServiceData[]>(path), {
     refreshInterval: 10000,
   });
 
@@ -22,15 +22,21 @@ export default function TopErrors() {
   return (
     <div className="glass-card flex min-h-[240px] flex-col p-5">
       <div className="mb-4 flex items-start justify-between">
-        <h3 className="text-[15px] font-semibold text-[#2c2c2c]">Top Errors</h3>
+        <h3 className="text-[16px] font-semibold text-[color:var(--text-primary)]">Top Errors</h3>
         {top.length > 0 && (
-          <span className="rounded-full bg-[#fff0f1] px-3 py-1 text-[12px] font-semibold text-[#c86d73]">
+          <span className="status-chip-danger rounded-full px-3 py-1 text-[12px] font-semibold">
             {top.length} services
           </span>
         )}
       </div>
 
-      {top.length > 0 ? (
+      {isLoading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, idx) => (
+            <div key={`top-errors-skeleton-${idx}`} className="skeleton-line" />
+          ))}
+        </div>
+      ) : top.length > 0 ? (
         <>
           <div className="mb-3 flex h-[56px] items-end gap-1.5">
             {top.map((svc) => (
@@ -44,18 +50,20 @@ export default function TopErrors() {
 
           <div className="space-y-2 text-[12px]">
             {top.map((svc) => (
-              <div key={svc.name} className="flex items-center justify-between text-[#6b6b6b]">
+              <div key={svc.name} className="flex items-center justify-between text-[color:var(--text-secondary)]">
                 <div className="flex items-center gap-2 truncate">
                   <span className="h-2 w-2 rounded-full bg-[#de6f72]" />
                   <span className="truncate">{svc.name}</span>
                 </div>
-                <span className="font-semibold text-[#4e4e4e]">{(svc.error_rate * 100).toFixed(2)}%</span>
+                <span className="font-semibold text-[color:var(--text-secondary)]">{(svc.error_rate * 100).toFixed(2)}%</span>
               </div>
             ))}
           </div>
         </>
       ) : (
-        <div className="flex flex-1 items-center justify-center text-[13px] text-[#9a9a9a]">No service data available</div>
+        <div className="dashboard-empty-state flex-1 rounded-[18px] border border-dashed border-[color:var(--card-border)]">
+          No service error data is available yet.
+        </div>
       )}
     </div>
   );

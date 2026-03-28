@@ -1,7 +1,8 @@
 import json
 import os
 
-from groq import Groq
+from google import genai
+from google.genai import types
 from services.prometheus_client import instant_query
 
 SERVICES = [
@@ -87,7 +88,7 @@ async def analyze_incidents() -> dict:
 
 
 async def ask_ai(question: str) -> dict:
-    """Process a natural language question about system health using Groq API."""
+    """Process a natural language question about system health using Gemini API."""
     analysis = await analyze_incidents()
 
     # Build context from real metrics
@@ -102,22 +103,22 @@ async def ask_ai(question: str) -> dict:
         f"- Service health:\n{json.dumps(analysis['service_health'], indent=2)}"
     )
 
-    groq_api_key = os.getenv("GROQ_API_KEY")
-    if not groq_api_key:
+    gemini_api_key = os.getenv("GEMINI_API_KEY")
+    if not gemini_api_key:
         # Fallback to heuristic response if no API key
         return _fallback_response(question, analysis)
 
     try:
-        client = Groq(api_key=groq_api_key)
-        chat = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            max_tokens=300,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": question},
-            ],
+        client = genai.Client(api_key=gemini_api_key)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-lite",
+            contents=question,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                max_output_tokens=300,
+            ),
         )
-        answer = chat.choices[0].message.content
+        answer = response.text
     except Exception as e:
         # Fallback on error
         return _fallback_response(question, analysis)
@@ -133,7 +134,7 @@ async def ask_ai(question: str) -> dict:
 
 
 def _fallback_response(question: str, analysis: dict) -> dict:
-    """Keyword-based fallback when Groq API is unavailable."""
+    """Keyword-based fallback when Gemini API is unavailable."""
     question_lower = question.lower()
 
     if "latency" in question_lower or "slow" in question_lower:

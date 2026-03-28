@@ -7,9 +7,9 @@ export default function RecentLogs() {
 
   return (
     <div className="glass-card flex min-h-[200px] flex-col p-5">
-      <h3 className="mb-4 text-[15px] font-semibold text-[#2c2c2c]">Recent Logs</h3>
+      <h3 className="mb-4 text-[16px] font-semibold text-[color:var(--text-primary)]">Recent Logs</h3>
 
-      <div className="overflow-hidden rounded-[18px] border border-[#efebe5] bg-white/70">
+      <div className="overflow-hidden rounded-[18px] border border-[color:var(--card-border)] bg-[color:var(--card-soft-bg)]">
         {(logs || []).slice(0, 4).map((log: any, index: number) => {
           const ts = log.timestamp
             ? new Date(Number(log.timestamp) / 1e6).toISOString().replace("T", " ").slice(11, 19)
@@ -18,18 +18,18 @@ export default function RecentLogs() {
           return (
             <div
               key={`${log.timestamp}-${index}`}
-              className="grid grid-cols-[92px_110px_minmax(0,1fr)_52px] items-center gap-3 border-b border-[#f1eeea] px-4 py-3 text-[12px] last:border-b-0"
+              className="grid grid-cols-[92px_110px_minmax(0,1fr)_52px] items-center gap-3 border-b border-[color:var(--card-border)] px-4 py-3 text-[12px] last:border-b-0"
             >
-              <span className="font-mono text-[#a2a2a2]">{ts}</span>
-              <span className="truncate font-semibold text-[#5f5f5f]">{log.service_name}</span>
-              <span className="truncate text-[#7c7c7c]">{log.message}</span>
-              <span className="text-right font-semibold uppercase text-[#9a9a9a]">{String(log.level || "info").slice(0, 4)}</span>
+              <span className="font-mono text-[color:var(--text-muted)]">{ts}</span>
+              <span className="truncate font-semibold text-[color:var(--text-secondary)]">{log.service_name}</span>
+              <span className="truncate text-[color:var(--text-secondary)]">{log.message}</span>
+              <span className="text-right font-semibold uppercase text-[color:var(--text-muted)]">{String(log.level || "info").slice(0, 4)}</span>
             </div>
           );
         })}
 
         {(!logs || logs.length === 0) && (
-          <div className="flex h-[140px] items-center justify-center text-[13px] text-[#9a9a9a]">No logs available</div>
+          <div className="dashboard-empty-state h-[140px]">No recent logs are available.</div>
         )}
       </div>
     </div>
