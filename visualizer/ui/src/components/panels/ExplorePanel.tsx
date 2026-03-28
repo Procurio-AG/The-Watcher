@@ -11,7 +11,6 @@ export default function ExplorePanel() {
 
   const handleAsk = async () => {
     if (!query.trim() || loading) return;
-
     setLoading(true);
     try {
       const response = await askAI(query);
@@ -25,10 +24,7 @@ export default function ExplorePanel() {
 
   return (
     <div className="glass-card flex h-full flex-col p-5">
-      <div>
-        <h3 className="text-[15px] font-bold text-[#1a1a1a]">Explore Further</h3>
-        <p className="mt-1 text-[12px] text-[#999]">Ask the backend incident analyzer a follow-up question</p>
-      </div>
+      <h3 className="text-[15px] font-semibold text-[#2d2d2d]">Explore Further</h3>
 
       <div className="mt-5">
         <input
@@ -36,9 +32,7 @@ export default function ExplorePanel() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              handleAsk();
-            }
+            if (event.key === "Enter") handleAsk();
           }}
           placeholder="Ask about service health..."
           className="dashboard-input"
@@ -46,15 +40,15 @@ export default function ExplorePanel() {
       </div>
 
       {result ? (
-        <div className="mt-4 flex-1 rounded-[18px] border border-[rgba(114,1,255,0.1)] bg-[rgba(114,1,255,0.03)] p-4">
-          <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#7201FF]">
+        <div className="dashboard-card-subtle mt-4 flex-1 p-4">
+          <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#556eb5]">
             <Sparkles className="h-3.5 w-3.5" />
             AI Response
           </div>
-          <p className="text-[13px] leading-6 text-[#555]">{result}</p>
+          <p className="text-[13px] leading-6 text-[#565656]">{result}</p>
         </div>
       ) : (
-        <div className="mt-4 flex flex-1 items-center rounded-[18px] border border-dashed border-white/30 px-5 text-[12px] text-[#aaa]">
+        <div className="mt-4 flex flex-1 items-center rounded-[20px] border border-dashed border-[#ece7df] px-5 text-[12px] text-[#a0a0a0]">
           Ask about latency, error spikes, unhealthy services, or current incident severity.
         </div>
       )}
@@ -63,7 +57,7 @@ export default function ExplorePanel() {
         <button
           onClick={handleAsk}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-[16px] bg-[#7201FF] px-5 py-3 text-[13px] font-semibold text-white shadow-[0_8px_24px_rgba(114,1,255,0.3)] transition hover:shadow-[0_12px_32px_rgba(114,1,255,0.4)] disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex items-center gap-2 rounded-[18px] bg-[linear-gradient(180deg,#526dac_0%,#415a99_100%)] px-5 py-3 text-[14px] font-semibold text-white shadow-[0_12px_24px_rgba(77,102,171,0.25)] disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           Ask AI
