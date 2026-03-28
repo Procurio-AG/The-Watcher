@@ -55,20 +55,12 @@ spec:
           value: "train-ticket"
         resources:
           requests:
-<<<<<<< HEAD
             cpu: 25m
             memory: 48Mi
           limits:
             cpu: 100m
             memory: 96Mi
-=======
-            cpu: 50m
-            memory: 128Mi
-          limits:
-            cpu: 200m
-            memory: 256Mi
->>>>>>> 1c321b9 (feat: ML pipeline in KEDA HPA)
----
+           
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -116,20 +108,12 @@ spec:
           value: "train-ticket"
         resources:
           requests:
-<<<<<<< HEAD
             cpu: 25m
             memory: 48Mi
           limits:
             cpu: 100m
             memory: 96Mi
-=======
-            cpu: 50m
-            memory: 128Mi
-          limits:
-            cpu: 200m
-            memory: 256Mi
->>>>>>> 1c321b9 (feat: ML pipeline in KEDA HPA)
----
+           
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -177,20 +161,12 @@ spec:
           value: "train-ticket"
         resources:
           requests:
-<<<<<<< HEAD
             cpu: 25m
             memory: 48Mi
           limits:
             cpu: 100m
             memory: 96Mi
-=======
-            cpu: 50m
-            memory: 128Mi
-          limits:
-            cpu: 200m
-            memory: 256Mi
->>>>>>> 1c321b9 (feat: ML pipeline in KEDA HPA)
----
+            
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -238,16 +214,9 @@ spec:
           value: "train-ticket"
         resources:
           requests:
-<<<<<<< HEAD
             cpu: 25m
             memory: 48Mi
           limits:
             cpu: 100m
             memory: 96Mi
-=======
-            cpu: 50m
-            memory: 128Mi
-          limits:
-            cpu: 200m
-            memory: 256Mi
->>>>>>> 1c321b9 (feat: ML pipeline in KEDA HPA)
+           
