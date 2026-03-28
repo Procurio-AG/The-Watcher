@@ -11,10 +11,9 @@ The-Watcher is an AI-driven observability pipeline designed for high-availabilit
 
 ## 🛠 Tech Stack
 - **Apps:** FastAPI (Python), OpenTelemetry.
-- **Infra:** Kubernetes (K3s), Pixie (eBPF), k6 (Load/Chaos).
-- **Edge:** WasmEdge, Grafana Loki.
-- **Brain:** LangGraph, FastAPI ML, Custom NLP Layer.
-- **PR Automation:** PyGithub + LLM/NLP.
+- **Infra:** Kubernetes (K3s), k6 (Load/Chaos).
+- **Edge:** WasmEdge
+- **Brain:** LangGraph, FastAPI ML, Language model
 
 ## Repository Structure
 (See the structure section below for full details)
@@ -24,5 +23,6 @@ The-Watcher is an AI-driven observability pipeline designed for high-availabilit
 2. **Start Services:** `kubectl apply -f infrastructure/k8s/deployments/`.
 3. **Run Attack:** `cd load-tests && k6 run scenarios/booking_flow.js`.
 4. **Watch Remediation:** Access the Visualizer at `localhost:3000`.
+5. **Detailed setup guide:** Refer `SETUP_AND_RUN.md`
 
 ## License MIT
