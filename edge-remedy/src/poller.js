@@ -1,10 +1,13 @@
 import { predict } from './wasm.js';
+import { remediate } from './remediate.js';
+import { publishAnomalyEvent } from './nats-publisher.js';
 
 const PROMETHEUS_URL = process.env.PROMETHEUS_URL || 'http://localhost:9090';
 const LOKI_URL = process.env.LOKI_URL || 'http://localhost:3100';
 const JAEGER_URL = process.env.JAEGER_URL || 'http://localhost:16686';
 
 const TARGET_SERVICE = process.env.TARGET_SERVICE || 'payment-service';
+const REMEDIATION_ENABLED = process.env.REMEDIATION_ENABLED !== 'false'; // on by default
 const POLL_INTERVAL_MS = 2000;
 const FETCH_TIMEOUT_MS = 1500;
 
@@ -111,7 +114,16 @@ async function poll() {
       console.log(`[STATUS] ✅ State 0 (Healthy). No action required.`);
     } else {
       console.warn(`[WARNING] 🚨 State ${state} Anomaly detected! Edge Wasm emitting remediation signal.`);
-      // If we were interfacing K8s, it would happen here. Per user request, we just output logits.
+
+      // Publish to NATS for LangGraph brain (Phase 3 deep RCA)
+      await publishAnomalyEvent(TARGET_SERVICE, state, { cpu: metrics.cpu, latency: metrics.latency, traceDuration });
+
+      // Execute immediate K8s remediation (Tier 1)
+      if (REMEDIATION_ENABLED) {
+        await remediate(TARGET_SERVICE, state);
+      } else {
+        console.log(`[REMEDIATE] Remediation disabled (REMEDIATION_ENABLED=false). Skipping.`);
+      }
     }
   } catch (err) {
     console.error(`[CRITICAL] Error in poller loop:`, err);

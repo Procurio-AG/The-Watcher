@@ -14,22 +14,43 @@ spec:
       labels:
         app: wasmedge-agent
     spec:
+      serviceAccountName: edge-remediation
       containers:
-      - name: wasmedge-node-monitor
-        image: wasmedge/wasmedge:latest
-        command: ["wasmedge", "--dir", ".:/", "monitor.wasm"]
+      - name: edge-poller
+        image: node:20-slim
+        workingDir: /app
+        command: ["node", "poller.js"]
         volumeMounts:
         - name: sla-config
           mountPath: /etc/config/sla_config.json
           subPath: sla_config.json
-        # Mount host node metrics or log directories to allow Wasm edge functions to natively detect starvation
         - name: host-metrics
           mountPath: /var/log/host
           readOnly: true
         env:
-        # Publish SLA violation events immediately back to Phase 3 LangGraph Event bus
         - name: EVENT_BUS_URL
           value: "nats://nats-service:4222"
+        - name: PROMETHEUS_URL
+          value: "http://prometheus-service:9090"
+        - name: LOKI_URL
+          value: "http://loki-service:3100"
+        - name: JAEGER_URL
+          value: "http://jaeger-service:16686"
+        - name: TARGET_SERVICE
+          value: "payment-service"
+        - name: K8S_NAMESPACE
+          value: "train-ticket"
+        - name: REMEDIATION_ENABLED
+          value: "true"
+        - name: REMEDIATION_COOLDOWN_MS
+          value: "60000"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
       volumes:
       - name: sla-config
         configMap:
@@ -37,3 +58,37 @@ spec:
       - name: host-metrics
         hostPath:
           path: /var/log
+---
+# RBAC: Allow the edge poller to restart and scale deployments
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: edge-remediation
+  namespace: train-ticket
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: edge-remediation
+  namespace: train-ticket
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "patch"]
+- apiGroups: ["apps"]
+  resources: ["deployments/scale"]
+  verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: edge-remediation
+  namespace: train-ticket
+subjects:
+- kind: ServiceAccount
+  name: edge-remediation
+  namespace: train-ticket
+roleRef:
+  kind: Role
+  name: edge-remediation
+  apiGroup: rbac.authorization.k8s.io
