@@ -51,10 +51,12 @@ export async function predict({ logLine, cpu, latency, traceDuration }) {
 }
 
 // --- Run directly: node wasm.js ---
-const output = await predict({
-  logLine:       'ERROR: Timeout System Down',
-  cpu:           72.5,
-  latency:       3.2,
-  traceDuration: 0.85,
-});
-console.log('Logits:', Array.from(output));
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  const output = await predict({
+    logLine:       'ERROR: Timeout System Down',
+    cpu:           72.5,
+    latency:       3.2,
+    traceDuration: 0.85,
+  });
+  console.log('Logits:', Array.from(output));
+}

@@ -1,0 +1,240 @@
+# The Watcher - Render Blueprint (Free Tier)
+# Deploy: Connect repo to Render → New Blueprint Instance → Select this repo
+#
+# All services use Render's free web service tier (no credit card required).
+# Services spin down after 15min of inactivity and cold-start in ~60s.
+#
+# After first deploy, update the gateway's SERVICE_URL env vars and
+# NEXT_PUBLIC_API_URL with the actual Render URLs from your dashboard.
+#
+# Not deployed (require paid tier or K8s):
+#   - Jaeger, Prometheus, Loki (observability infra)
+#   - edge-remedy (needs K8s API)
+#   - promtail (needs Docker socket)
+
+services:
+  # ─── Microservices ──────────────────────────────────────────────────────────
+
+  - type: web
+    name: watcher-user-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.user-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_TRACES_EXPORTER
+        value: none
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: web
+    name: watcher-auth-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.auth-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_TRACES_EXPORTER
+        value: none
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: web
+    name: watcher-station-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.station-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_TRACES_EXPORTER
+        value: none
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: web
+    name: watcher-train-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.train-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_TRACES_EXPORTER
+        value: none
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: web
+    name: watcher-schedule-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.schedule-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_TRACES_EXPORTER
+        value: none
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: web
+    name: watcher-ticket-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.ticket-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_TRACES_EXPORTER
+        value: none
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: web
+    name: watcher-order-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.order-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_TRACES_EXPORTER
+        value: none
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: web
+    name: watcher-payment-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.payment-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_TRACES_EXPORTER
+        value: none
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  - type: web
+    name: watcher-notification-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.notification-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_TRACES_EXPORTER
+        value: none
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+
+  # ─── Gateway (Public API) ──────────────────────────────────────────────────
+
+  - type: web
+    name: watcher-gateway
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.gateway-service
+    dockerContext: ./services/irctc/services
+    envVars:
+      - key: OTEL_TRACES_EXPORTER
+        value: none
+      - key: OTEL_METRICS_EXPORTER
+        value: none
+      - key: OTEL_LOGS_EXPORTER
+        value: none
+      - key: CHAOS_LATENCY_MAX_MS
+        value: "0"
+      - key: CHAOS_ERROR_RATE
+        value: "0.0"
+      # ── After first deploy, update these with actual Render URLs ──
+      - key: USER_SERVICE_URL
+        value: https://watcher-user-service.onrender.com
+      - key: AUTH_SERVICE_URL
+        value: https://watcher-auth-service.onrender.com
+      - key: STATION_SERVICE_URL
+        value: https://watcher-station-service.onrender.com
+      - key: TRAIN_SERVICE_URL
+        value: https://watcher-train-service.onrender.com
+      - key: SCHEDULE_SERVICE_URL
+        value: https://watcher-schedule-service.onrender.com
+      - key: TICKET_SERVICE_URL
+        value: https://watcher-ticket-service.onrender.com
+      - key: ORDER_SERVICE_URL
+        value: https://watcher-order-service.onrender.com
+      - key: PAYMENT_SERVICE_URL
+        value: https://watcher-payment-service.onrender.com
+      - key: NOTIFICATION_SERVICE_URL
+        value: https://watcher-notification-service.onrender.com
+
+  # ─── Visualizer ────────────────────────────────────────────────────────────
+
+  - type: web
+    name: watcher-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.visualizer-api
+    dockerContext: ./visualizer/api
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+
+  - type: web
+    name: watcher-ui
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile.visualizer-ui
+    dockerContext: ./visualizer/ui
+    envVars:
+      # ── After first deploy, update with actual watcher-api URL ──
+      - key: NEXT_PUBLIC_API_URL
+        value: https://watcher-api.onrender.com

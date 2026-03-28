@@ -19,6 +19,10 @@ logger = setup_logger("order-service")
 
 TICKET_SERVICE_URL = os.getenv("TICKET_SERVICE_URL", "http://ticket-service:8000")
 
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
 class OrderRequest(BaseModel):
     ticket_id: str
 

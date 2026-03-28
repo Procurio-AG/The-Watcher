@@ -15,6 +15,10 @@ app.add_middleware(ChaosMiddleware)
 Instrumentator().instrument(app).expose(app)
 logger = setup_logger("train-service")
 
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
 class TrainRoute(BaseModel):
     id: str
     name: str # e.g. "G1234"

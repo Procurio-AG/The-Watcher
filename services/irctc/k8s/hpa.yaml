@@ -1,5 +1,9 @@
 ## HorizontalPodAutoscalers for critical services
 ## Provides reactive scaling alongside edge-poller's proactive remediation
+##
+## WARNING: Do NOT apply this file alongside keda-scaledobjects.yaml.
+## KEDA creates its own HPAs internally — having both will cause replica
+## flapping. Use this file ONLY if KEDA is NOT installed in the cluster.
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -28,13 +32,13 @@ spec:
         averageUtilization: 80
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 10
+      stabilizationWindowSeconds: 180
       policies:
       - type: Pods
-        value: 2
-        periodSeconds: 15
+        value: 1
+        periodSeconds: 60
     scaleDown:
-      stabilizationWindowSeconds: 120
+      stabilizationWindowSeconds: 180
       policies:
       - type: Pods
         value: 1
@@ -61,13 +65,13 @@ spec:
         averageUtilization: 75
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 10
+      stabilizationWindowSeconds: 180
       policies:
       - type: Pods
-        value: 2
-        periodSeconds: 15
+        value: 1
+        periodSeconds: 60
     scaleDown:
-      stabilizationWindowSeconds: 120
+      stabilizationWindowSeconds: 180
       policies:
       - type: Pods
         value: 1
@@ -94,13 +98,13 @@ spec:
         averageUtilization: 75
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 10
+      stabilizationWindowSeconds: 180
       policies:
       - type: Pods
-        value: 2
-        periodSeconds: 15
+        value: 1
+        periodSeconds: 60
     scaleDown:
-      stabilizationWindowSeconds: 120
+      stabilizationWindowSeconds: 180
       policies:
       - type: Pods
         value: 1

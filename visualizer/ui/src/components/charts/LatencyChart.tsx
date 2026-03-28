@@ -10,115 +10,92 @@ import {
   ResponsiveContainer,
   ReferenceDot,
 } from "recharts";
-import { useLatencySeries, type MetricsRange } from "@/hooks/useMetrics";
 import { format } from "date-fns";
-import SearchBar from "@/components/shared/SearchBar";
-
-function formatSeconds(value: number) {
-  if (value >= 1000) return `${(value / 1000).toFixed(value >= 2000 ? 0 : 1)}s`;
-  return `${Math.round(value)}ms`;
-}
+import { useLatencySeries, type MetricsRange } from "@/hooks/useMetrics";
+import { formatDuration } from "@/lib/utils";
 
 export default function LatencyChart({ range }: { range: MetricsRange }) {
   const { data } = useLatencySeries(range);
 
-  const chartData = (() => {
-    if (!data?.p95) return [];
-    return data.p95.map((point: any) => ({
-      time: point.timestamp * 1000,
-      p95: +(point.value * 1000).toFixed(1),
-    }));
-  })();
+  const chartData = (data?.p95 || []).map((point) => ({
+    time: point.timestamp * 1000,
+    p95: point.value,
+  }));
 
-  const peakPoint =
-    chartData.length > 0
-      ? chartData.reduce((highest, point) => (point.p95 > highest.p95 ? point : highest), chartData[0])
-      : null;
+  const peak = chartData.reduce<{ time: number; p95: number } | null>((best, point) => {
+    if (!best || point.p95 > best.p95) return point;
+    return best;
+  }, null);
 
   return (
-    <div className="mock-panel card-hover flex h-full flex-col p-4">
-      <div className="mb-4">
-        <h3 className="text-[15px] font-medium tracking-[-0.03em] text-[#69655f]">
-          Service Latency (p95)
-        </h3>
+    <div className="flex h-full flex-col">
+      <div className="mb-4 flex items-start justify-between">
+        <div>
+          <h3 className="text-[15px] font-bold text-[#1a1a1a]">Service Latency (p95)</h3>
+          <p className="mt-1 text-[12px] text-[#999]">Live backend latency series across the selected time window</p>
+        </div>
+        <span className="rounded-full bg-[rgba(114,1,255,0.08)] px-3 py-1 text-[11px] font-bold text-[#7201FF]">
+          {range}
+        </span>
       </div>
 
-      <div className="min-h-0 flex-1 rounded-[18px] bg-[linear-gradient(180deg,#ffffff_0%,#eff5ff_100%)] px-2 pb-2 pt-3">
+      <div className="min-h-0 flex-1" style={{ minHeight: 220 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 14, right: 10, bottom: 2, left: -16 }}>
+          <AreaChart data={chartData} margin={{ top: 18, right: 12, bottom: 4, left: -18 }}>
             <defs>
               <linearGradient id="latencyFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3e84f5" stopOpacity={0.58} />
-                <stop offset="58%" stopColor="#75afff" stopOpacity={0.26} />
-                <stop offset="100%" stopColor="#72b2f9" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#7201FF" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#7201FF" stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid className="chart-grid" strokeDasharray="0" vertical />
+            <CartesianGrid stroke="rgba(0,0,0,0.04)" vertical={true} strokeDasharray="0" />
             <XAxis
               dataKey="time"
-              tickFormatter={(t) => format(new Date(t), "HH:mm")}
-              stroke="#d4d8e1"
-              fontSize={10}
+              tickFormatter={(value) => format(new Date(value), "h:mm a")}
               tickLine={false}
               axisLine={false}
+              tick={{ fill: "#aaa", fontSize: 11 }}
               minTickGap={30}
             />
             <YAxis
-              tickFormatter={(v) => formatSeconds(v)}
-              stroke="#d4d8e1"
-              fontSize={10}
+              tickFormatter={(value) => (value >= 1 ? `${value.toFixed(0)}s` : `${Math.round(value * 1000)}ms`)}
               tickLine={false}
               axisLine={false}
-              width={42}
+              tick={{ fill: "#aaa", fontSize: 11 }}
             />
             <Tooltip
-              labelFormatter={(t) => format(new Date(t), "h:mm:ss a")}
-              formatter={(value: number) => [formatSeconds(value), "p95 latency"]}
+              labelFormatter={(value) => format(new Date(value), "h:mm:ss a")}
+              formatter={(value: number) => [formatDuration(value), "P95 latency"]}
               contentStyle={{
-                borderRadius: "16px",
-                border: "1px solid #e8e4dd",
-                boxShadow: "0 18px 36px rgba(120, 112, 100, 0.12)",
-                padding: "10px 14px",
+                borderRadius: "14px",
+                border: "1px solid rgba(114,1,255,0.15)",
+                background: "rgba(255,255,255,0.92)",
+                backdropFilter: "blur(12px)",
+                boxShadow: "0 12px 26px rgba(0,0,0,0.08)",
+                padding: "10px 12px",
                 fontSize: "12px",
               }}
             />
-            <Area
-              type="monotone"
-              dataKey="p95"
-              stroke="#3f88f8"
-              strokeWidth={3}
-              fill="url(#latencyFill)"
-              dot={false}
-              activeDot={{ r: 6, stroke: "#4c92fb", strokeWidth: 2, fill: "#fff" }}
-            />
-            {peakPoint ? (
+            {peak ? (
               <ReferenceDot
-                x={peakPoint.time}
-                y={peakPoint.p95}
-                r={4.5}
+                x={peak.time}
+                y={peak.p95}
+                r={4}
                 fill="#ffffff"
-                stroke="#4f95f0"
+                stroke="#7201FF"
                 strokeWidth={2}
-                ifOverflow="extendDomain"
                 label={{
-                  value: formatSeconds(peakPoint.p95),
+                  value: formatDuration(peak.p95),
                   position: "top",
-                  offset: 18,
-                  fill: "#494844",
-                  fontSize: 12,
-                  fontWeight: 600,
+                  fill: "#7201FF",
+                  fontSize: 11,
+                  fontWeight: 700,
                 }}
               />
             ) : null}
+            <Area type="monotone" dataKey="p95" stroke="#7201FF" strokeWidth={2.5} fill="url(#latencyFill)" />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
-
-      <div className="mt-4">
-        <p className="mb-2 text-[11px] font-medium text-[#8d8aa3]">
-          What would you like to explore next?
-        </p>
-        <SearchBar placeholder="What caused the latency spike at checkout?" />
       </div>
     </div>
   );

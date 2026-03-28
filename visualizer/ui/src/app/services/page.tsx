@@ -4,70 +4,56 @@ import useSWR from "swr";
 import { apiFetch } from "@/lib/api";
 import PageHeader from "@/components/layout/PageHeader";
 import StatusBadge from "@/components/cards/StatusBadge";
+import RequestVolume from "@/components/charts/RequestVolume";
+import TopErrors from "@/components/panels/TopErrors";
 
 export default function ServicesPage() {
-  const { data: services } = useSWR("/api/services", (p: string) => apiFetch<any[]>(p), {
+  const { data: services } = useSWR("/api/services", (path: string) => apiFetch<any[]>(path), {
     refreshInterval: 10000,
   });
 
+  const sortedServices = [...(services || [])].sort((a, b) => b.rps - a.rps);
+
   return (
-    <div className="flex h-full flex-col">
-      <PageHeader title="Services" showControls={false} />
-      <div className="mock-panel flex-1 overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-surface-200 bg-[#faf9f6]">
-              <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-                Service
-              </th>
-              <th className="px-6 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-                Status
-              </th>
-              <th className="px-6 py-4 text-right text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-                P95 Latency
-              </th>
-              <th className="px-6 py-4 text-right text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-                Error Rate
-              </th>
-              <th className="px-6 py-4 text-right text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-                Requests/s
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {(services || []).slice(0, 9).map((svc: any) => (
-              <tr
-                key={svc.name}
-                className="cursor-pointer border-b border-surface-200 last:border-0 hover:bg-surface-50 transition-colors"
-              >
-                <td className="px-6 py-4">
-                  <span className="text-[13px] font-semibold text-gray-900">{svc.name}</span>
-                </td>
-                <td className="px-6 py-4">
-                  <StatusBadge status={svc.status} size="md" />
-                </td>
-                <td className="px-6 py-4 text-[13px] text-right font-medium text-gray-700">
-                  {svc.latency_p95.toFixed(1)}ms
-                </td>
-                <td className="px-6 py-4 text-[13px] text-right">
-                  <span
-                    className={`font-semibold ${
-                      svc.error_rate > 5 ? "text-red-500" : "text-gray-700"
-                    }`}
-                  >
-                    {svc.error_rate.toFixed(1)}%
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-[13px] text-right font-medium text-gray-700">
-                  {svc.rps.toFixed(2)}
-                </td>
+    <div className="flex h-full flex-col overflow-hidden pt-1">
+      <PageHeader
+        title="Services"
+        subtitle="Service health, latency, request throughput, and backend-derived status"
+        showControls={false}
+      />
+
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1.5fr)_360px] gap-5">
+        <div className="dashboard-card min-h-0 overflow-hidden p-2">
+          <table className="h-full w-full table-fixed">
+            <thead>
+              <tr className="border-b border-white/30 text-left text-[11px] uppercase tracking-[0.12em] text-[#999]">
+                <th className="px-4 py-4 font-semibold">Service</th>
+                <th className="px-4 py-4 font-semibold">Status</th>
+                <th className="px-4 py-4 text-right font-semibold">P95 Latency</th>
+                <th className="px-4 py-4 text-right font-semibold">Error Rate</th>
+                <th className="px-4 py-4 text-right font-semibold">Requests/s</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {(!services || services.length === 0) && (
-          <div className="py-16 text-center text-[13px] text-gray-400">Loading services...</div>
-        )}
+            </thead>
+            <tbody>
+              {sortedServices.slice(0, 10).map((service) => (
+                <tr key={service.name} className="border-b border-white/20 text-[14px] last:border-b-0">
+                  <td className="px-4 py-4 font-semibold text-[#1a1a1a]">{service.name}</td>
+                  <td className="px-4 py-4">
+                    <StatusBadge status={service.status} size="md" />
+                  </td>
+                  <td className="px-4 py-4 text-right font-semibold text-[#555]">{service.latency_p95.toFixed(1)}ms</td>
+                  <td className="px-4 py-4 text-right font-semibold text-[#555]">{service.error_rate.toFixed(2)}%</td>
+                  <td className="px-4 py-4 text-right font-semibold text-[#555]">{service.rps.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="grid min-h-0 grid-rows-2 gap-5">
+          <RequestVolume range="15m" />
+          <TopErrors />
+        </div>
       </div>
     </div>
   );
