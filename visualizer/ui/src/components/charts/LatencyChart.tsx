@@ -37,7 +37,7 @@ export default function LatencyChart({ range }: { range: MetricsRange }) {
         <h3 className="text-[15px] font-medium text-[#6a6a6a]">Service Latency (p95)</h3>
       </div>
 
-      <div className="min-h-0 flex-1" style={{ minHeight: 210 }}>
+      <div style={{ height: 230 }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 18, right: 10, bottom: 0, left: -16 }}>
             <defs>

@@ -25,6 +25,14 @@ body {
   overflow: hidden;
 }
 
+main {
+  scrollbar-width: none;
+}
+
+main::-webkit-scrollbar {
+  display: none;
+}
+
 * {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;

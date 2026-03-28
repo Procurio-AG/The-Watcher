@@ -6,7 +6,7 @@ export default function RecentLogs() {
   const { data: logs } = useLogs(undefined, undefined, 4);
 
   return (
-    <div className="glass-card flex h-full flex-col p-5">
+    <div className="glass-card flex min-h-[200px] flex-col p-5">
       <h3 className="mb-4 text-[15px] font-semibold text-[#2c2c2c]">Recent Logs</h3>
 
       <div className="overflow-hidden rounded-[18px] border border-[#efebe5] bg-white/70">

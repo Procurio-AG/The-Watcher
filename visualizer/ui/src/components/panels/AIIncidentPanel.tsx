@@ -20,7 +20,7 @@ export default function AIIncidentPanel() {
   const fixTime = data?.fix_time_seconds;
 
   return (
-    <div className="glass-card flex h-full flex-col p-5">
+    <div className="glass-card flex flex-col p-5">
       <div className="mb-4 flex items-center gap-2">
         <span className="inline-flex items-center gap-2 rounded-full bg-[#4f67a9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white">
           <Sparkles className="h-3.5 w-3.5" />

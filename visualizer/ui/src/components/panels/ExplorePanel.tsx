@@ -23,7 +23,7 @@ export default function ExplorePanel() {
   };
 
   return (
-    <div className="glass-card flex h-full flex-col p-5">
+    <div className="glass-card flex flex-col p-5">
       <h3 className="text-[15px] font-semibold text-[#2d2d2d]">Explore Further</h3>
 
       <div className="mt-5">

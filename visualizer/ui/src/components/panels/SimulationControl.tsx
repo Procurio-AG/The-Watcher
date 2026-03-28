@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Play } from "lucide-react";
+import { Loader2, Play, Zap } from "lucide-react";
 import { startAttackResolveSimulation, useSimulationStatus } from "@/hooks/useSimulation";
 
 const tone: Record<string, string> = {
@@ -36,10 +36,14 @@ export default function SimulationControl() {
       <button
         onClick={handleStart}
         disabled={running || starting}
-        className="glass-pill inline-flex items-center gap-2 border-[#e7e2db] bg-white px-4 py-2 font-semibold text-[#303030] disabled:cursor-not-allowed disabled:opacity-70"
+        className="glass-pill inline-flex items-center gap-2 border-[#e7e2db] bg-white px-4 py-2 font-semibold text-[#303030] transition-all hover:border-[#d4cfc7] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {running || starting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
-        Run Attack
+        {running || starting ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Zap className="h-3.5 w-3.5 text-[#e67e22]" />
+        )}
+        {running ? "Attacking..." : "Run Attack"}
       </button>
     </div>
   );
