@@ -7,6 +7,7 @@ import { pushMetrics, pushForecastMetric } from './metrics-pusher.js';
 const PROMETHEUS_URL = process.env.PROMETHEUS_URL || 'http://localhost:9090';
 const LOKI_URL = process.env.LOKI_URL || 'http://localhost:3100';
 const JAEGER_URL = process.env.JAEGER_URL || 'http://localhost:16686';
+const CENTRAL_BRAIN_URL = process.env.CENTRAL_BRAIN_URL || 'http://central-brain:8080';
 
 const TARGET_SERVICE = process.env.TARGET_SERVICE || 'payment-service';
 const REMEDIATION_ENABLED = process.env.REMEDIATION_ENABLED !== 'false'; // on by default
@@ -136,6 +137,24 @@ async function poll() {
 
       // Publish to NATS for LangGraph brain (Phase 3 deep RCA)
       await publishAnomalyEvent(TARGET_SERVICE, state, { cpu: metrics.cpu, latency: metrics.latency, traceDuration });
+
+      // Trigger Central Brain RCA on severe anomalies (state 2)
+      if (state >= 2) {
+        fetch(`${CENTRAL_BRAIN_URL}/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_name: TARGET_SERVICE,
+            anomaly_score: anomalyScore,
+            timestamp: new Date().toISOString(),
+            cpu: metrics.cpu,
+            latency: metrics.latency,
+            error_rate: 0,
+            log_line: logLine,
+            trace_id: null,
+          }),
+        }).catch(err => console.error('[BRAIN] RCA trigger failed:', err.message));
+      }
 
       if (REMEDIATION_ENABLED) {
         // Restart is always direct — HPA cannot restart pods

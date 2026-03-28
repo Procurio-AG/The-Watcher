@@ -56,7 +56,7 @@ htmlcov/
 #*.onnx
 *.joblib
 *.pkl
-
+central_brain/.env
 # =========================
 # Node.js / Frontend (React / Next.js)
 # =========================
